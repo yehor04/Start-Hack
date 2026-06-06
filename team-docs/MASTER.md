@@ -288,5 +288,10 @@ distance**, and **contact-result penalties**.
    re-introduces revenue into ranking, which we deliberately removed (patient-benefit, not money).
    Keep cost as a **displayed KPI only**. Protects the ethics story the judges care about.
 
-Action: Dev 2 + Olha pick TS as the source of truth, port the ranker, unify the data model.
-Claude can do this port in one pass when you're ready.
+**✅ DONE (2026-06-06).** Olha's ranker is now **ported into `src/lib/scoring.ts`** (hard filters:
+consent + doctor match + procedure-duration + joined-after-slot; pool-normalised soft score:
+urgency, half-day/preferred-time match, days waiting, contact-attempt/result penalties, fairness).
+`prisma/schema.prisma` + `prisma/seed.ts` adopt her fields and **load `waitlist_patients.json`
+directly** (80 patients, 5 doctors). `procedure_cost` is kept as a **KPI only**, not in the score.
+Verified live: cancel a Dr. Bauer slot → 9 eligible / 71 excluded, top = urgent + time-fit patient,
+Maria Gruber excluded by the consent gate. `ranker.py` stays as the reference/notebook.

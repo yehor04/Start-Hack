@@ -1,6 +1,5 @@
-// Refill — fonio.ai track. Schema designed CORE (any source has these) vs
-// ENRICHMENT (optional; scoring must degrade gracefully when null).
-// SQLite for hack speed; arrays/enums stored as JSON strings.
+// Refill — unified data model (Olha's richer ranker fields adopted).
+// SQLite for hack speed. The waitlist = Patient rows with onWaitlist = true.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,91 +11,77 @@ datasource db {
 }
 
 model Patient {
-  id              String   @id @default(cuid())
+  id    String @id @default(cuid())
+  name  String
+  phone String
+  age   Int?
 
-  // --- CORE (required; any PMS/EHR or fonio variable set exposes these) ---
-  name            String
-  phone           String
-  language        String   @default("de") // "de" | "en"
-  consentOutbound Boolean  @default(false) // HARD GATE: no consent -> never called
+  consentOutbound Boolean @default(true) // GDPR hard gate
+  onWaitlist      Boolean @default(true) // the waitlist = active patients
 
-  // --- ENRICHMENT (optional; missing -> neutral scoring, never a crash) ---
-  preferredDays   String?  // JSON e.g. ["mon","wed"]; null = no preference
-  preferredTimes  String?  // JSON e.g. ["morning","evening"]; null = no preference
-  lastContactedAt DateTime? // recent contact -> down-weight (don't spam)
-  noShowCount     Int      @default(0)
-  acceptRate      Float?   // historical accept prior 0..1; null -> neutral 0.5
+  // clinical + waitlist signals (drive the ranker)
+  urgency           String   @default("routine") // urgent | moderate | routine
+  condition         String   @default("")
+  assignedDoctor    String   @default("")
+  timePreference    String   @default("flexible") // morning | afternoon | flexible
+  preferredTime     String   @default("09:00") // "HH:MM"
+  daysOnWaitlist    Int      @default(0)
+  assignedDate      DateTime @default(now())
+  contactAttempts   Int      @default(0)
+  lastContactResult String   @default("none") // none | voicemail | no_answer | declined
+  timesSkipped      Int      @default(0)
+  procedureCost     Int      @default(0) // KPI only — NOT in the score
+  procedureTimeMin  Int      @default(30)
 
-  createdAt       DateTime @default(now())
-
-  waitlist        WaitlistEntry[]
-  attempts        RecoveryAttempt[]
+  createdAt DateTime @default(now())
+  attempts  RecoveryAttempt[]
 }
 
 model Slot {
-  id           String   @id @default(cuid())
-  startsAt     DateTime
-  durationMin  Int      @default(30)
-  treatment    String                    // e.g. "implant_consult"
-  practitioner String?
-  room         String?
-  status       String   @default("open") // booked | cancelled | open | filling | filled
-  valueEur     Int      @default(0)       // perishable value recovered if refilled
-  bookedPatientName String? // occupant of a booked slot (the practice's existing schedule)
-  recoveredBy  String?  // patient name who refilled it via Refill (for the "Recovered ✓" badge)
-  createdAt    DateTime @default(now())
+  id                String   @id @default(cuid())
+  startsAt          DateTime
+  durationMin       Int      @default(60)
+  treatment         String // display label
+  practitioner      String? // = doctor; must match Patient.assignedDoctor
+  room              String?
+  status            String   @default("open") // booked | cancelled | open | filling | filled
+  valueEur          Int      @default(0)
+  bookedPatientName String? // occupant of a booked slot (existing schedule)
+  recoveredBy       String? // who refilled it via Refill
+  createdAt         DateTime @default(now())
 
-  attempts     RecoveryAttempt[]
-}
-
-model WaitlistEntry {
-  id                    String   @id @default(cuid())
-  patientId             String
-  patient               Patient  @relation(fields: [patientId], references: [id])
-
-  // CORE
-  treatment             String
-
-  // ENRICHMENT
-  urgency               Int?     // 1..5; null -> neutral
-  earliestAvailable     DateTime?
-  fairnessLastOfferedAt DateTime? // fairness: down-weight recently offered
-
-  addedAt               DateTime @default(now())
-  active                Boolean  @default(true)
+  attempts RecoveryAttempt[]
 }
 
 model RecoveryAttempt {
-  id             String   @id @default(cuid())
-  slotId         String
-  slot           Slot     @relation(fields: [slotId], references: [id])
-  patientId      String
-  patient        Patient  @relation(fields: [patientId], references: [id])
+  id        String  @id @default(cuid())
+  slotId    String
+  slot      Slot    @relation(fields: [slotId], references: [id])
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
 
-  status         String   @default("queued") // queued|calling|yes|no|no_answer|voicemail|callback|failed
+  status String @default("queued") // queued|calling|yes|no|no_answer|voicemail|callback|failed
 
-  // scoring snapshot for audit + explainability
   score          Float
   pAccept        Float?
   evEur          Float?
-  scoreBreakdown String   // JSON: per-factor contributions
-  reasonText     String?  // human-readable counterfactual "why this patient"
+  scoreBreakdown String // JSON of per-factor contributions
+  reasonText     String?
 
   fonioCallId    String?
-  idempotencyKey String   @unique // no double-calling / double-booking
+  idempotencyKey String   @unique
   createdAt      DateTime @default(now())
   resolvedAt     DateTime?
 
-  @@unique([slotId, patientId]) // never call the same candidate twice for a slot
+  @@unique([slotId, patientId])
 }
 
-// Append-only audit + dashboard timeline.
 model EventLog {
   id        String   @id @default(cuid())
-  type      String   // cancellation | scored | call_started | outcome | booked | escalated
+  type      String
   slotId    String?
   patientId String?
   attemptId String?
-  payload   String   // JSON
+  payload   String
   createdAt DateTime @default(now())
 }

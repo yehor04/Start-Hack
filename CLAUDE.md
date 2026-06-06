@@ -35,10 +35,10 @@ the consent gate and an audit trail. **Open item:** wire the real fonio outbound
 Run: `cp .env.example .env && npm install && npx prisma migrate dev && npm run seed && npm run dev`
 (→ http://localhost:3000, patient page `/p/demo`).
 
-⚠️ Two scoring implementations currently exist: `src/lib/scoring.ts` (TypeScript, in the live
-app) and Olha's `ranker.py` (richer — doctor match, procedure-duration filter, contact-result
-penalties). **Converge on the TS one**, port her logic in, and keep `procedure_cost` as a
-displayed KPI — NOT in the score (patient-benefit, not revenue). See `team-docs/MASTER.md` §14.
+✅ Olha's richer ranker is **ported into `src/lib/scoring.ts`** (hard filters: consent + doctor
+match + procedure-duration + joined-after-slot; pool-normalised soft score). The schema + seed
+adopt her fields and load `waitlist_patients.json` (80 patients, 5 doctors). `procedure_cost` is a
+displayed KPI only — NOT in the score (patient-benefit, not revenue). `ranker.py` is the reference.
 
 ## Non-negotiables (from the brief — optimize for these)
 

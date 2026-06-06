@@ -1,156 +1,112 @@
-// Refill seed — a private dental/implantology practice.
-// Deterministic (seeded RNG) so the demo is reproducible.
-// The DEMO COHORT is hand-crafted so the EV dispatcher visibly beats "call the first".
-// The BULK POPULATION feeds the simulation harness (A/B uplift numbers).
+// Refill seed — uses Olha's richer dataset (waitlist_patients.json, 80 patients, 5 doctors)
+// plus a hand-built "today's schedule" of booked slots. Deterministic for a reproducible demo.
 //
-// Run: npx prisma db seed   (configure in package.json: "prisma": { "seed": "ts-node prisma/seed.ts" })
+// Run: npm run seed   (after: npx prisma migrate dev)
 
 import { PrismaClient } from "@prisma/client";
+import { readFileSync } from "fs";
+import { join } from "path";
+
 const db = new PrismaClient();
 
-// --- deterministic RNG ---
-let _s = 1337;
-const rnd = () => (_s = (_s * 1664525 + 1013904223) % 4294967296) / 4294967296;
-const pick = <T>(a: T[]): T => a[Math.floor(rnd() * a.length)];
-const chance = (p: number) => rnd() < p;
-const between = (lo: number, hi: number) => lo + Math.floor(rnd() * (hi - lo + 1));
+type Raw = {
+  id: string; name: string; age: number; urgency: string; condition: string;
+  assigned_doctor: string; time_preference: string; preferred_time: string;
+  days_on_waitlist: number; assigned_date: string; contact_attempts: number;
+  last_contact_result: string; times_skipped: number; procedure_cost: number;
+  procedure_time_min: number; phone: string;
+};
+
+// Patients we deliberately mark as NO-CONSENT to demo the GDPR gate.
+// P001 (Maria Gruber) is an urgent Dr. Bauer/morning patient — she'd rank top, so excluding
+// her makes the consent gate visible right at the top of the list.
+const NO_CONSENT = new Set(["P001", "P020", "P044"]);
 
 const hrs = (h: number) => new Date(Date.now() + h * 3_600_000);
-const daysAt = (d: number, hh: number, mm = 0) => {
-  const dt = hrs(d * 24);
-  dt.setHours(hh, mm, 0, 0);
-  return dt;
+const todayAt = (hh: number, mm = 0) => {
+  const d = new Date();
+  d.setHours(hh, mm, 0, 0);
+  return d;
 };
-
-// Real phones for the LIVE demo come from env; otherwise obvious placeholders.
-// Set DEMO_PHONE_1..3 in .env to team members' phones (with consent).
-const PHONE = (n: number) => process.env[`DEMO_PHONE_${n}`] ?? `+4300000000${n}`;
-
-const TREATMENTS: Record<string, number> = {
-  implant_consult: 450,
-  crown_fitting: 350,
-  root_canal: 300,
-  ortho_adjust: 120,
-  hygiene: 90,
-};
-const FIRST = ["Lukas","Maria","Hans","Sophie","Elena","Jakob","Anna","Felix","Lena","Paul","Clara","Tobias","Nina","David","Julia","Markus","Sarah","Florian","Lea","Stefan"];
-const LAST  = ["Gruber","Huber","Bauer","Wagner","Mueller","Pichler","Steiner","Moser","Mayer","Hofer","Berger","Fuchs","Eder","Fischer","Schmid"];
-const WINDOWS = ["morning","afternoon","evening"];
-const WEEKDAYS = ["mon","tue","wed","thu","fri"];
+// Real demo phones (with consent) override the placeholder phones for the first few patients.
+const demoPhone = (n: number) => process.env[`DEMO_PHONE_${n}`] || null;
 
 async function main() {
   await db.eventLog.deleteMany();
   await db.recoveryAttempt.deleteMany();
-  await db.waitlistEntry.deleteMany();
   await db.slot.deleteMany();
   await db.patient.deleteMany();
 
-  // ---------------- DEMO COHORT ----------------
-  // Flagship perishable slot: high-value implant consult, just cancelled, this evening-ish.
-  const slot1 = await db.slot.create({
-    data: {
-      startsAt: daysAt(2, 17, 30), treatment: "implant_consult", valueEur: 450,
-      practitioner: "Dr. Berger", room: "OP 1", status: "open",
-    },
-  });
+  const raw: Raw[] = JSON.parse(readFileSync(join(process.cwd(), "waitlist_patients.json"), "utf8"));
 
-  // A) FIRST on the list — but NO CONSENT -> hard-gated out (shows consent gating).
-  const pA = await db.patient.create({ data: {
-    name: "Hans Gruber", phone: PHONE(3), language: "de", consentOutbound: false,
-    preferredTimes: JSON.stringify(["evening"]), acceptRate: 0.7, noShowCount: 0,
-  }});
-  // B) SECOND, consented — but bad fit: prefers mornings, contacted yesterday, low accept.
-  const pB = await db.patient.create({ data: {
-    name: "Maria Huber", phone: PHONE(4), language: "de", consentOutbound: true,
-    preferredDays: JSON.stringify(["mon","tue"]), preferredTimes: JSON.stringify(["morning"]),
-    lastContactedAt: hrs(-20), acceptRate: 0.2, noShowCount: 2,
-  }});
-  // C) EV WINNER — consented, evening match, high accept, not recently contacted.
-  //    Route to DEMO_PHONE_1 (we answer YES on the live call).
-  const pC = await db.patient.create({ data: {
-    name: "Lukas Bauer", phone: PHONE(1), language: "de", consentOutbound: true,
-    preferredTimes: JSON.stringify(["evening","afternoon"]), acceptRate: 0.85, noShowCount: 0,
-  }});
-  // D) STRONG #2 — for the no-answer EDGE CASE. Route to DEMO_PHONE_2 (let it ring out).
-  const pD = await db.patient.create({ data: {
-    name: "Sophie Mayer", phone: PHONE(2), language: "de", consentOutbound: true,
-    preferredTimes: JSON.stringify(["evening"]), acceptRate: 0.75, noShowCount: 0,
-  }});
-
-  for (const d of [
-    { p: pA, urgency: 3, added: hrs(-72) }, // added first
-    { p: pB, urgency: 2, added: hrs(-60) },
-    { p: pC, urgency: 5, added: hrs(-40) },
-    { p: pD, urgency: 4, added: hrs(-30) },
-  ]) {
-    await db.waitlistEntry.create({ data: {
-      patientId: d.p.id, treatment: "implant_consult", urgency: d.urgency,
-      earliestAvailable: hrs(1), addedAt: d.added,
-    }});
+  // ---- waitlist patients ----
+  let idx = 0;
+  for (const p of raw) {
+    idx++;
+    const overridePhone =
+      p.id === "P002" ? demoPhone(1) : p.id === "P003" ? demoPhone(2) : p.id === "P004" ? demoPhone(3) : null;
+    await db.patient.create({
+      data: {
+        name: p.name,
+        phone: overridePhone || p.phone,
+        age: p.age,
+        consentOutbound: !NO_CONSENT.has(p.id),
+        onWaitlist: true,
+        urgency: p.urgency,
+        condition: p.condition,
+        assignedDoctor: p.assigned_doctor,
+        timePreference: p.time_preference,
+        preferredTime: p.preferred_time,
+        daysOnWaitlist: p.days_on_waitlist,
+        assignedDate: new Date(p.assigned_date),
+        contactAttempts: p.contact_attempts,
+        lastContactResult: p.last_contact_result,
+        timesSkipped: p.times_skipped,
+        procedureCost: p.procedure_cost,
+        procedureTimeMin: p.procedure_time_min,
+      },
+    });
   }
 
-  // Second flagship slot for the EDGE-CASE run (top pick rings out -> advance to next).
-  await db.slot.create({ data: {
-    startsAt: daysAt(3, 18, 0), treatment: "implant_consult", valueEur: 450,
-    practitioner: "Dr. Berger", room: "OP 1", status: "open",
-  }});
-
-  // ---------------- TODAY'S SCHEDULE (booked appointments for the Schedule view) ----------------
-  // The receptionist sees these; cancelling one frees the slot and triggers the recovery loop.
-  // The 17:30 implant is the DEMO cancel target (its waitlist = the demo cohort above).
-  const today: Array<[number, number, string, string, string]> = [
-    // [hour, minute, patientName, treatment, practitioner]
-    [9, 0,  "Anna Keller",  "hygiene",         "Dr. Moser"],
-    [9, 30, "Felix Wagner", "crown_fitting",   "Dr. Berger"],
-    [10, 30,"Nina Fischer", "root_canal",      "Dr. Eder"],
-    [11, 30,"Paul Steiner", "hygiene",         "Dr. Moser"],
-    [14, 0, "Clara Hofer",  "ortho_adjust",    "Dr. Berger"],
-    [15, 30,"David Fuchs",  "crown_fitting",   "Dr. Eder"],
-    [17, 30,"Maria Schmid", "implant_consult", "Dr. Berger"], // <- demo cancel target
+  // ---- today's schedule (booked appointments) ----
+  // Each row: [hh, mm, patientName, treatment, doctor, durationMin, valueEur]
+  // The 17:30 Dr. Stefan Bauer root canal is the DEMO cancel target — cancelling it pulls his
+  // waitlist (urgent endodontic patients) into the recovery loop.
+  const schedule: [number, number, string, string, string, number, number][] = [
+    [9, 0, "Johanna Reiter", "Hygiene", "Dr. Anna Wagner", 30, 90],
+    [9, 30, "Markus Lang", "Crown fitting", "Dr. Elisabeth Huber", 60, 350],
+    [10, 30, "Petra Kofler", "Root canal", "Dr. Stefan Bauer", 75, 450],
+    [11, 30, "Georg Brunner", "Filling", "Dr. Michael Gruber", 45, 180],
+    [14, 0, "Sandra Holzer", "Check-up", "Dr. Thomas Müller", 30, 80],
+    [15, 30, "Daniel Auer", "Crown fitting", "Dr. Anna Wagner", 60, 350],
+    [17, 30, "Maria Schmid", "Root canal", "Dr. Stefan Bauer", 90, 550], // <- demo cancel target
   ];
-  for (const [hh, mm, who, tr, doc] of today) {
-    await db.slot.create({ data: {
-      startsAt: daysAt(0, hh, mm), treatment: tr, valueEur: TREATMENTS[tr],
-      practitioner: doc, status: "booked", bookedPatientName: who,
-    }});
+  for (const [hh, mm, who, treatment, doctor, durationMin, valueEur] of schedule) {
+    await db.slot.create({
+      data: {
+        startsAt: todayAt(hh, mm),
+        durationMin,
+        treatment,
+        practitioner: doctor,
+        room: "OP 1",
+        status: "booked",
+        valueEur,
+        bookedPatientName: who,
+      },
+    });
   }
 
-  // ---------------- BULK POPULATION (simulation harness) ----------------
-  const treatments = Object.keys(TREATMENTS);
-  for (let i = 0; i < 28; i++) {
-    const p = await db.patient.create({ data: {
-      name: `${pick(FIRST)} ${pick(LAST)}`,
-      phone: `+4366000${between(10000, 99999)}`,
-      language: chance(0.85) ? "de" : "en",
-      consentOutbound: chance(0.8),
-      preferredTimes: chance(0.7) ? JSON.stringify([pick(WINDOWS)]) : null,
-      preferredDays: chance(0.5) ? JSON.stringify([pick(WEEKDAYS), pick(WEEKDAYS)]) : null,
-      lastContactedAt: chance(0.3) ? hrs(-between(2, 240)) : null,
-      noShowCount: between(0, 3),
-      acceptRate: chance(0.8) ? Math.round((0.2 + rnd() * 0.7) * 100) / 100 : null,
-    }});
-    const tr = pick(treatments);
-    await db.waitlistEntry.create({ data: {
-      patientId: p.id, treatment: tr,
-      urgency: chance(0.8) ? between(1, 5) : null,
-      earliestAvailable: hrs(between(1, 48)),
-      addedAt: hrs(-between(1, 200)),
-    }});
-  }
-
-  // Extra open slots across treatments for the simulator to refill.
-  for (let i = 0; i < 12; i++) {
-    const tr = pick(treatments);
-    await db.slot.create({ data: {
-      startsAt: daysAt(between(1, 5), between(9, 18), pick([0, 30])),
-      treatment: tr, valueEur: TREATMENTS[tr], status: "open",
-      practitioner: pick(["Dr. Berger", "Dr. Moser", "Dr. Eder"]),
-    }});
-  }
-
-  console.log("Seed complete: demo cohort + today's schedule + 28 bulk patients + open slots.");
+  const counts = {
+    patients: raw.length,
+    noConsent: NO_CONSENT.size,
+    slots: schedule.length,
+  };
+  console.log("Seed complete:", counts);
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
   .finally(() => db.$disconnect());

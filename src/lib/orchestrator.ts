@@ -3,7 +3,7 @@
 // yes -> book + stop; otherwise advance to the next eligible candidate. Idempotent.
 
 import { db } from "./db";
-import { scoreCandidate, type Scored } from "./scoring";
+import { rankPool, type PatientLite, type Scored } from "./scoring";
 import { triggerCall } from "./fonio";
 
 export type Outcome = "yes" | "no" | "no_answer" | "voicemail" | "callback";
@@ -17,6 +17,27 @@ export type RankedCandidate = {
   attemptStatus: string | null;
 };
 
+function toLite(p: any): PatientLite {
+  return {
+    id: p.id,
+    name: p.name,
+    phone: p.phone,
+    consentOutbound: p.consentOutbound,
+    urgency: p.urgency,
+    condition: p.condition,
+    assignedDoctor: p.assignedDoctor,
+    timePreference: p.timePreference,
+    preferredTime: p.preferredTime,
+    daysOnWaitlist: p.daysOnWaitlist,
+    assignedDate: p.assignedDate,
+    contactAttempts: p.contactAttempts,
+    lastContactResult: p.lastContactResult,
+    timesSkipped: p.timesSkipped,
+    procedureTimeMin: p.procedureTimeMin,
+    procedureCost: p.procedureCost,
+  };
+}
+
 async function log(type: string, payload: Record<string, unknown> & { slotId?: string }) {
   await db.eventLog.create({
     data: { type, slotId: payload.slotId ?? null, payload: JSON.stringify(payload) },
@@ -26,43 +47,32 @@ async function log(type: string, payload: Record<string, unknown> & { slotId?: s
 export async function rankCandidates(slotId: string): Promise<RankedCandidate[]> {
   const slot = await db.slot.findUnique({ where: { id: slotId } });
   if (!slot) return [];
-  const entries = await db.waitlistEntry.findMany({
-    where: { active: true, treatment: slot.treatment },
-    include: { patient: true },
-  });
+  const patients = await db.patient.findMany({ where: { onWaitlist: true } });
+  const ranked = rankPool(
+    { startsAt: slot.startsAt, durationMin: slot.durationMin, doctor: slot.practitioner ?? "" },
+    patients.map(toLite),
+  );
   const attempts = await db.recoveryAttempt.findMany({ where: { slotId } });
   const byPatient = new Map(attempts.map((a) => [a.patientId, a] as const));
 
-  const ranked = entries.map((e) => {
-    const scored = scoreCandidate({
-      slotStartsAt: slot.startsAt,
-      slotTreatment: slot.treatment,
-      patient: e.patient,
-      entry: e,
-    });
-    const at = byPatient.get(e.patientId);
+  return ranked.map((r) => {
+    const at = byPatient.get(r.patient.id);
     return {
-      patientId: e.patientId,
-      name: e.patient.name,
-      phone: e.patient.phone,
-      scored,
+      patientId: r.patient.id,
+      name: r.patient.name,
+      phone: r.patient.phone,
+      scored: r.scored,
       attempted: !!at,
       attemptStatus: at?.status ?? null,
     };
   });
-
-  ranked.sort(
-    (a, b) =>
-      Number(b.scored.eligible) - Number(a.scored.eligible) || b.scored.score - a.scored.score,
-  );
-  return ranked;
 }
 
 /** Unified trigger for ALL cancellation sources (patient page, reception, fonio inbound). */
 export async function cancelSlot(slotId: string, source = "reception") {
   const slot = await db.slot.findUnique({ where: { id: slotId } });
   if (!slot) throw new Error("slot not found");
-  if (slot.status === "filling") return slot; // idempotent: already recovering
+  if (slot.status === "filling") return slot; // idempotent
 
   await db.slot.update({
     where: { id: slotId },
@@ -130,19 +140,16 @@ export async function handleOutcome(attemptId: string, outcome: Outcome) {
       where: { id: attempt.slotId },
       data: { status: "filled", recoveredBy: attempt.patient.name },
     });
-    await db.waitlistEntry.updateMany({
-      where: { patientId: attempt.patientId, treatment: attempt.slot.treatment },
-      data: { active: false },
-    });
-    await log("booked", {
-      slotId: attempt.slotId,
-      patient: attempt.patient.name,
-      value: attempt.slot.valueEur,
-    });
+    await db.patient.update({ where: { id: attempt.patientId }, data: { onWaitlist: false } });
+    await log("booked", { slotId: attempt.slotId, patient: attempt.patient.name, value: attempt.slot.valueEur });
     return;
   }
 
-  // no / no_answer / voicemail / callback -> advance to the next candidate
+  // record a soft signal so the next ranking reflects the failed contact
+  await db.patient.update({
+    where: { id: attempt.patientId },
+    data: { contactAttempts: { increment: 1 }, lastContactResult: outcome === "no" ? "declined" : outcome },
+  });
   await callNext(attempt.slotId);
 }
 

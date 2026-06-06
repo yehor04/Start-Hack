@@ -1,157 +1,160 @@
-// Patient-benefit scoring — transparent, explainable, degrades gracefully on missing fields.
-// priority = urgency × likelihoodToAttend × fit. Consent is a hard eligibility gate.
-// Revenue is NEVER part of the score (it's only a displayed KPI).
+// Patient-benefit ranker — ported from Olha's ranker.py into the live app.
+// Hard filters + pool-normalised weighted soft score. Transparent + explainable.
+// IMPORTANT: procedure_cost is NOT part of the score (revenue is a KPI, not an objective).
 
-type Json = string | null;
-const arr = (j: Json): string[] => {
-  try {
-    return j ? (JSON.parse(j) as string[]) : [];
-  } catch {
-    return [];
-  }
+export type PatientLite = {
+  id: string;
+  name: string;
+  phone: string;
+  consentOutbound: boolean;
+  urgency: string; // urgent | moderate | routine
+  condition: string;
+  assignedDoctor: string;
+  timePreference: string; // morning | afternoon | flexible
+  preferredTime: string; // "HH:MM"
+  daysOnWaitlist: number;
+  assignedDate: Date;
+  contactAttempts: number;
+  lastContactResult: string; // none | voicemail | no_answer | declined
+  timesSkipped: number;
+  procedureTimeMin: number;
+  procedureCost: number;
 };
-const clamp = (x: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, x));
-const WD = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
-export function windowOf(d: Date): "morning" | "afternoon" | "evening" {
-  const h = new Date(d).getHours();
-  if (h < 12) return "morning";
-  if (h < 17) return "afternoon";
-  return "evening";
-}
+export type SlotLite = { startsAt: Date; durationMin: number; doctor: string };
 
 export type Factor = { label: string; value: number; positive: boolean; detail: string };
-
 export type Scored = {
   eligible: boolean;
-  score: number; // 0..1 (0 when ineligible)
-  urgency: number;
-  likelihood: number;
-  fit: number;
+  score: number; // 0..1
+  urgency: number; // 0..1 (display)
+  likelihood: number; // 0..1 (display: "likely to take it")
+  fit: number; // 0..1 (display)
   factors: Factor[];
   reason: string;
 };
+export type Ranked = { patient: PatientLite; scored: Scored };
 
-export type ScoreInput = {
-  slotStartsAt: Date;
-  slotTreatment: string;
-  patient: {
-    consentOutbound: boolean;
-    preferredTimes: Json;
-    preferredDays: Json;
-    lastContactedAt: Date | null;
-    noShowCount: number;
-    acceptRate: number | null;
-  };
-  entry: {
-    treatment: string;
-    urgency: number | null;
-    addedAt: Date;
-    fairnessLastOfferedAt: Date | null;
-  };
-  now?: Date;
+// Tunable weights (cost intentionally excluded from the score).
+const WEIGHTS = { urgency: 0.35, timeMatch: 0.2, days: 0.2, attempts: 0.1, result: 0.1, skipped: 0.05 };
+const URGENCY: Record<string, number> = { urgent: 1, moderate: 0.5, routine: 0 };
+const RESULT_PENALTY: Record<string, number> = { none: 0, voicemail: 0.2, no_answer: 0.5, declined: 1 };
+
+const clamp = (x: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, x));
+const halfDay = (t: Date) => (new Date(t).getHours() < 13 ? "morning" : "afternoon");
+const minutes = (d: Date) => new Date(d).getHours() * 60 + new Date(d).getMinutes();
+const parseHHMM = (s: string) => {
+  const [h, m] = (s || "0:0").split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
 };
 
-export function scoreCandidate(input: ScoreInput): Scored {
-  const now = input.now ?? new Date();
-  const p = input.patient;
-  const e = input.entry;
-  const factors: Factor[] = [];
-
-  // ---- eligibility gates ----
-  if (!p.consentOutbound) return zero("No outbound consent (GDPR) — excluded.");
-  if (e.treatment !== input.slotTreatment)
-    return zero("Waiting for a different treatment — not this slot.");
-
-  // ---- urgency (0..1) ----
-  let urgency = e.urgency != null ? e.urgency / 5 : 0.6; // null -> neutral
-  const waitDays = (now.getTime() - new Date(e.addedAt).getTime()) / 86_400_000;
-  const waitBonus = clamp(waitDays / 30, 0, 0.2); // up to +0.2 for long waits
-  urgency = clamp(urgency + waitBonus);
-  factors.push({
-    label: "Urgency",
-    value: urgency,
-    positive: urgency >= 0.6,
-    detail: e.urgency != null ? `priority ${e.urgency}/5` : "no urgency set",
-  });
-
-  // ---- likelihood to attend (0..1) ----
-  const base = p.acceptRate ?? 0.5;
-  let like = base;
-  const win = windowOf(input.slotStartsAt);
-  const wd = WD[new Date(input.slotStartsAt).getDay()];
-  const times = arr(p.preferredTimes);
-  const days = arr(p.preferredDays);
-  let timeMatch = false,
-    timeMismatch = false;
-  if (times.length) {
-    if (times.includes(win)) {
-      like += 0.15;
-      timeMatch = true;
-    } else {
-      like -= 0.18;
-      timeMismatch = true;
-    }
-  }
-  if (days.length && days.includes(wd)) like += 0.08;
-  const recentlyContacted =
-    !!p.lastContactedAt &&
-    now.getTime() - new Date(p.lastContactedAt).getTime() < 48 * 3600_000;
-  if (recentlyContacted) like -= 0.25;
-  if (p.noShowCount) like -= Math.min(0.24, p.noShowCount * 0.08);
-  like = clamp(like, 0.05, 0.98);
-  factors.push({
-    label: "Likely to say yes",
-    value: like,
-    positive: like >= 0.6,
-    detail:
-      `${Math.round(like * 100)}% (base ${Math.round(base * 100)}%` +
-      `${timeMatch ? `, ${win} match` : ""}${timeMismatch ? `, prefers ${times.join("/")}` : ""}` +
-      `${recentlyContacted ? ", contacted recently" : ""}${p.noShowCount ? `, ${p.noShowCount} no-shows` : ""})`,
-  });
-
-  // ---- fit (0..1): treatment matched (=1) minus fairness penalty ----
-  let fit = 1;
-  const recentlyOffered =
-    !!e.fairnessLastOfferedAt &&
-    now.getTime() - new Date(e.fairnessLastOfferedAt).getTime() < 7 * 24 * 3600_000;
-  if (recentlyOffered) {
-    fit -= 0.25;
-    factors.push({ label: "Fairness", value: 0.75, positive: false, detail: "offered a slot recently" });
-  }
-  fit = clamp(fit, 0.3, 1);
-
-  const score = clamp(urgency * like * fit);
-  const reason = buildReason({ urgency, like, timeMatch, timeMismatch, times, win, recentlyContacted, noShow: p.noShowCount });
-
-  return { eligible: true, score, urgency, likelihood: like, fit, factors, reason };
-
-  function zero(why: string): Scored {
-    return { eligible: false, score: 0, urgency: 0, likelihood: 0, fit: 0, factors: [], reason: why };
-  }
+function timeMatch(pref: string, preferred: string, slot: Date): number {
+  const sh = halfDay(slot);
+  if (pref !== "flexible" && pref !== sh) return 0; // wrong half-day
+  if (pref === "flexible") return 1;
+  const diff = Math.abs(parseHHMM(preferred) - minutes(slot));
+  return Math.max(0, 1 - diff / 180); // within 3h of their preferred time
 }
 
-function buildReason(o: {
-  urgency: number;
-  like: number;
-  timeMatch: boolean;
-  timeMismatch: boolean;
-  times: string[];
-  win: string;
-  recentlyContacted: boolean;
-  noShow: number;
-}): string {
+function normalize(v: number, pool: number[], penalty = false): number {
+  const lo = Math.min(...pool);
+  const hi = Math.max(...pool);
+  if (lo === hi) return penalty ? 0 : 0.5;
+  return (v - lo) / (hi - lo);
+}
+
+export function hardFilterReason(p: PatientLite, slot: SlotLite): string | null {
+  if (!p.consentOutbound) return "No outbound consent (GDPR) — excluded.";
+  if (new Date(p.assignedDate) > new Date(slot.startsAt)) return "Joined the waitlist after this slot's date.";
+  if (p.procedureTimeMin > slot.durationMin)
+    return `Procedure needs ${p.procedureTimeMin} min > ${slot.durationMin} min slot.`;
+  if (slot.doctor && p.assignedDoctor !== slot.doctor)
+    return `Assigned to ${p.assignedDoctor}, not ${slot.doctor}.`;
+  return null;
+}
+
+/** Hard-filter then pool-normalised soft scoring. Eligible (ranked) first, then ineligible. */
+export function rankPool(slot: SlotLite, patients: PatientLite[]): Ranked[] {
+  const eligible: PatientLite[] = [];
+  const rejected: { p: PatientLite; why: string }[] = [];
+  for (const p of patients) {
+    const why = hardFilterReason(p, slot);
+    if (why) rejected.push({ p, why });
+    else eligible.push(p);
+  }
+
+  const out: Ranked[] = [];
+  if (eligible.length) {
+    const daysPool = eligible.map((p) => p.daysOnWaitlist);
+    const attemptsPool = eligible.map((p) => p.contactAttempts);
+    const skippedPool = eligible.map((p) => p.timesSkipped);
+
+    for (const p of eligible) {
+      const u = URGENCY[p.urgency] ?? 0;
+      const tm = timeMatch(p.timePreference, p.preferredTime, slot.startsAt);
+      const dN = normalize(p.daysOnWaitlist, daysPool);
+      const aP = normalize(p.contactAttempts, attemptsPool, true);
+      const rP = RESULT_PENALTY[p.lastContactResult] ?? 0.2;
+      const sP = normalize(p.timesSkipped, skippedPool, true);
+
+      const score = clamp(
+        WEIGHTS.urgency * u +
+          WEIGHTS.timeMatch * tm +
+          WEIGHTS.days * dN -
+          WEIGHTS.attempts * aP -
+          WEIGHTS.result * rP -
+          WEIGHTS.skipped * sP,
+      );
+      const likelihood = clamp(0.35 + 0.45 * tm + 0.2 * (1 - rP) - 0.15 * aP);
+      const fit = clamp(0.5 + 0.5 * dN - 0.3 * sP);
+
+      const factors: Factor[] = [
+        { label: "Urgency", value: u, positive: u >= 0.5, detail: p.urgency },
+        {
+          label: "Time match",
+          value: tm,
+          positive: tm >= 0.5,
+          detail: tm === 0 ? `prefers ${p.timePreference}` : p.timePreference === "flexible" ? "flexible" : `near ${p.preferredTime}`,
+        },
+        { label: "Waiting", value: dN, positive: dN >= 0.5, detail: `${p.daysOnWaitlist} days` },
+        {
+          label: "Reachability",
+          value: 1 - rP,
+          positive: rP < 0.3,
+          detail: p.lastContactResult === "none" ? "no prior attempts" : `last: ${p.lastContactResult}`,
+        },
+      ];
+      if (p.timesSkipped) factors.push({ label: "Fairness", value: 1 - sP, positive: false, detail: `skipped ${p.timesSkipped}×` });
+
+      out.push({
+        patient: p,
+        scored: { eligible: true, score, urgency: u, likelihood, fit, factors, reason: buildReason(p, tm, rP) },
+      });
+    }
+    out.sort((a, b) => b.scored.score - a.scored.score);
+  }
+
+  for (const r of rejected) {
+    out.push({
+      patient: r.p,
+      scored: { eligible: false, score: 0, urgency: 0, likelihood: 0, fit: 0, factors: [], reason: r.why },
+    });
+  }
+  return out;
+}
+
+function buildReason(p: PatientLite, tm: number, rP: number): string {
   const pos: string[] = [];
   const neg: string[] = [];
-  if (o.urgency >= 0.7) pos.push("high urgency");
-  else if (o.urgency < 0.45) neg.push("lower urgency");
-  if (o.timeMatch) pos.push(`prefers ${o.win}s (fits the slot)`);
-  if (o.timeMismatch) neg.push(`prefers ${o.times.join("/")}, slot is ${o.win}`);
-  if (o.like >= 0.75) pos.push("very likely to accept");
-  if (o.recentlyContacted) neg.push("contacted recently");
-  if (o.noShow) neg.push(`${o.noShow} past no-show${o.noShow > 1 ? "s" : ""}`);
+  if (p.urgency === "urgent") pos.push("urgent need");
+  else if (p.urgency === "routine") neg.push("routine, can wait");
+  if (tm >= 0.8) pos.push("time fits their preference");
+  else if (tm === 0) neg.push(`prefers ${p.timePreference}s`);
+  if (p.daysOnWaitlist >= 14) pos.push(`waited ${p.daysOnWaitlist} days`);
+  if (rP >= 0.5) neg.push(`hard to reach (${p.lastContactResult})`);
+  if (p.timesSkipped) neg.push(`skipped ${p.timesSkipped}×`);
   let s = "";
   if (pos.length) s += "Strong: " + pos.join(", ") + ".";
   if (neg.length) s += (s ? " " : "") + "Caveats: " + neg.join(", ") + ".";
-  return s || "Eligible candidate.";
+  return s || `${p.condition}.`;
 }
