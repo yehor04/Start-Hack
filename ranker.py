@@ -19,8 +19,7 @@ WEIGHTS = {
     "doctor_match":     0.20,  # replaces hard filter — soft compatibility score
     "contact_attempts": 0.10,  # penalty — subtracted
     "contact_result":   0.10,  # penalty — subtracted
-    "times_skipped":    0.05,  # penalty — subtracted
-    "procedure_cost":   0.05,  # small positive
+    "times_skipped":    0.05   # penalty — subtracted
 }
 
 URGENCY_SCORE = {
@@ -114,7 +113,6 @@ def score_candidates(candidates: list, slot: dict, doctors: list = None, doctor_
     days_pool     = [p["days_on_waitlist"] for p in candidates]
     attempts_pool = [p["contact_attempts"] for p in candidates]
     skipped_pool  = [p["times_skipped"]    for p in candidates]
-    cost_pool     = [p["procedure_cost"]   for p in candidates]
 
     scored = []
     for p in candidates:
@@ -125,7 +123,6 @@ def score_candidates(candidates: list, slot: dict, doctors: list = None, doctor_
         attempt_pen  = _normalize(p["contact_attempts"], attempts_pool, penalty=True)
         result_pen   = CONTACT_RESULT_PENALTY.get(p["last_contact_result"], 0.2)
         skipped_pen  = _normalize(p["times_skipped"],    skipped_pool,  penalty=True)
-        cost_norm    = _normalize(p["procedure_cost"],   cost_pool)
 
         score = (
             WEIGHTS["urgency"]          *  urgency     +
@@ -134,8 +131,7 @@ def score_candidates(candidates: list, slot: dict, doctors: list = None, doctor_
             WEIGHTS["doctor_match"]     *  doc_match   -
             WEIGHTS["contact_attempts"] *  attempt_pen -
             WEIGHTS["contact_result"]   *  result_pen  -
-            WEIGHTS["times_skipped"]    *  skipped_pen +
-            WEIGHTS["procedure_cost"]   *  cost_norm
+            WEIGHTS["times_skipped"]    *  skipped_pen 
         )
 
         scored.append({
@@ -148,8 +144,7 @@ def score_candidates(candidates: list, slot: dict, doctors: list = None, doctor_
                 "doctor_match":      round( doc_match,  3),
                 "contact_attempts":  round(-attempt_pen, 3),
                 "contact_result":    round(-result_pen,  3),
-                "times_skipped":     round(-skipped_pen, 3),
-                "procedure_cost":    round( cost_norm,   3),
+                "times_skipped":     round(-skipped_pen, 3)
             },
         })
 
@@ -203,12 +198,11 @@ def print_results(result: dict, top_n: int = 5) -> None:
             f"attempts={bd['contact_attempts']:+.2f}  "
             f"result={bd['contact_result']:+.2f}  "
             f"skips={bd['times_skipped']:+.2f}  "
-            f"cost={bd['procedure_cost']:+.2f}"
         )
         print(
             f"       {p['days_on_waitlist']} days waiting  ·  "
             f"{p['contact_attempts']} contact attempts ({p['last_contact_result']})  ·  "
-            f"skipped {p['times_skipped']}×  ·  €{p['procedure_cost']}"
+            f"skipped {p['times_skipped']}"
         )
         print()
 
