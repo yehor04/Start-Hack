@@ -15,7 +15,9 @@
     "times_skipped": 1,
     "procedure_cost": 350,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P002",
@@ -33,7 +35,9 @@
     "times_skipped": 0,
     "procedure_cost": 550,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P003",
@@ -51,7 +55,9 @@
     "times_skipped": 2,
     "procedure_cost": 280,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P004",
@@ -69,7 +75,9 @@
     "times_skipped": 0,
     "procedure_cost": 300,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": true
   },
   {
     "id": "P005",
@@ -87,7 +95,9 @@
     "times_skipped": 0,
     "procedure_cost": 200,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P006",
@@ -105,7 +115,9 @@
     "times_skipped": 0,
     "procedure_cost": 320,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P007",
@@ -123,7 +135,9 @@
     "times_skipped": 1,
     "procedure_cost": 750,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P008",
@@ -141,7 +155,9 @@
     "times_skipped": 0,
     "procedure_cost": 400,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P009",
@@ -159,7 +175,9 @@
     "times_skipped": 0,
     "procedure_cost": 180,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": true
   },
   {
     "id": "P010",
@@ -177,7 +195,9 @@
     "times_skipped": 0,
     "procedure_cost": 250,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P011",
@@ -195,7 +215,9 @@
     "times_skipped": 0,
     "procedure_cost": 350,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P012",
@@ -213,7 +235,9 @@
     "times_skipped": 0,
     "procedure_cost": 380,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P013",
@@ -231,7 +255,9 @@
     "times_skipped": 0,
     "procedure_cost": 500,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P014",
@@ -249,7 +275,9 @@
     "times_skipped": 2,
     "procedure_cost": 280,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P015",
@@ -267,7 +295,9 @@
     "times_skipped": 0,
     "procedure_cost": 600,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P016",
@@ -285,7 +315,9 @@
     "times_skipped": 0,
     "procedure_cost": 200,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P017",
@@ -303,7 +335,9 @@
     "times_skipped": 0,
     "procedure_cost": 620,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": false
   },
   {
     "id": "P018",
@@ -321,7 +355,9 @@
     "times_skipped": 1,
     "procedure_cost": 950,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P019",
@@ -339,7 +375,9 @@
     "times_skipped": 0,
     "procedure_cost": 380,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P020",
@@ -357,7 +395,9 @@
     "times_skipped": 0,
     "procedure_cost": 280,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P021",
@@ -375,7 +415,9 @@
     "times_skipped": 3,
     "procedure_cost": 1500,
     "procedure_time_min": 120,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P022",
@@ -393,7 +435,9 @@
     "times_skipped": 0,
     "procedure_cost": 420,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P023",
@@ -411,7 +455,9 @@
     "times_skipped": 0,
     "procedure_cost": 780,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": true
   },
   {
     "id": "P024",
@@ -429,7 +475,9 @@
     "times_skipped": 2,
     "procedure_cost": 900,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P025",
@@ -447,7 +495,9 @@
     "times_skipped": 0,
     "procedure_cost": 650,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P026",
@@ -465,7 +515,9 @@
     "times_skipped": 1,
     "procedure_cost": 1800,
     "procedure_time_min": 120,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P027",
@@ -483,7 +535,9 @@
     "times_skipped": 0,
     "procedure_cost": 580,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P028",
@@ -501,7 +555,9 @@
     "times_skipped": 0,
     "procedure_cost": 450,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P029",
@@ -519,7 +575,9 @@
     "times_skipped": 0,
     "procedure_cost": 600,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P030",
@@ -537,7 +595,9 @@
     "times_skipped": 0,
     "procedure_cost": 180,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P031",
@@ -555,7 +615,9 @@
     "times_skipped": 0,
     "procedure_cost": 640,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": true
   },
   {
     "id": "P032",
@@ -573,7 +635,9 @@
     "times_skipped": 4,
     "procedure_cost": 120,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P033",
@@ -591,7 +655,9 @@
     "times_skipped": 0,
     "procedure_cost": 80,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P034",
@@ -609,7 +675,9 @@
     "times_skipped": 1,
     "procedure_cost": 880,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P035",
@@ -627,7 +695,9 @@
     "times_skipped": 0,
     "procedure_cost": 160,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P036",
@@ -645,7 +715,9 @@
     "times_skipped": 5,
     "procedure_cost": 700,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P037",
@@ -663,7 +735,9 @@
     "times_skipped": 0,
     "procedure_cost": 560,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P038",
@@ -681,7 +755,9 @@
     "times_skipped": 0,
     "procedure_cost": 760,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P039",
@@ -699,7 +775,9 @@
     "times_skipped": 0,
     "procedure_cost": 720,
     "procedure_time_min": 75,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P040",
@@ -717,7 +795,9 @@
     "times_skipped": 0,
     "procedure_cost": 1100,
     "procedure_time_min": 120,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P041",
@@ -735,7 +815,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P042",
@@ -753,7 +835,9 @@
     "times_skipped": 0,
     "procedure_cost": 80,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P043",
@@ -771,7 +855,9 @@
     "times_skipped": 0,
     "procedure_cost": 320,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P044",
@@ -789,7 +875,9 @@
     "times_skipped": 0,
     "procedure_cost": 190,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P045",
@@ -807,7 +895,9 @@
     "times_skipped": 0,
     "procedure_cost": 75,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": false
   },
   {
     "id": "P046",
@@ -825,7 +915,9 @@
     "times_skipped": 0,
     "procedure_cost": 120,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P047",
@@ -843,7 +935,9 @@
     "times_skipped": 2,
     "procedure_cost": 70,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P048",
@@ -861,7 +955,9 @@
     "times_skipped": 0,
     "procedure_cost": 170,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P049",
@@ -879,7 +975,9 @@
     "times_skipped": 0,
     "procedure_cost": 75,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P050",
@@ -897,7 +995,9 @@
     "times_skipped": 3,
     "procedure_cost": 90,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P051",
@@ -915,7 +1015,9 @@
     "times_skipped": 0,
     "procedure_cost": 65,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P052",
@@ -933,7 +1035,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P053",
@@ -951,7 +1055,9 @@
     "times_skipped": 0,
     "procedure_cost": 90,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P054",
@@ -969,7 +1075,9 @@
     "times_skipped": 1,
     "procedure_cost": 100,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P055",
@@ -987,7 +1095,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P056",
@@ -1005,7 +1115,9 @@
     "times_skipped": 0,
     "procedure_cost": 200,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": true
   },
   {
     "id": "P057",
@@ -1023,7 +1135,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P058",
@@ -1041,7 +1155,9 @@
     "times_skipped": 0,
     "procedure_cost": 50,
     "procedure_time_min": 20,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P059",
@@ -1059,7 +1175,9 @@
     "times_skipped": 0,
     "procedure_cost": 60,
     "procedure_time_min": 20,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P060",
@@ -1077,7 +1195,9 @@
     "times_skipped": 6,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P061",
@@ -1095,7 +1215,9 @@
     "times_skipped": 0,
     "procedure_cost": 70,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P062",
@@ -1113,7 +1235,9 @@
     "times_skipped": 0,
     "procedure_cost": 180,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": false
   },
   {
     "id": "P063",
@@ -1131,7 +1255,9 @@
     "times_skipped": 0,
     "procedure_cost": 130,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P064",
@@ -1149,7 +1275,9 @@
     "times_skipped": 2,
     "procedure_cost": 120,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P065",
@@ -1167,7 +1295,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P066",
@@ -1185,7 +1315,9 @@
     "times_skipped": 0,
     "procedure_cost": 70,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P067",
@@ -1203,7 +1335,9 @@
     "times_skipped": 0,
     "procedure_cost": 75,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P068",
@@ -1221,7 +1355,9 @@
     "times_skipped": 1,
     "procedure_cost": 90,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P069",
@@ -1239,7 +1375,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P070",
@@ -1257,7 +1395,9 @@
     "times_skipped": 0,
     "procedure_cost": 150,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": true
   },
   {
     "id": "P071",
@@ -1275,7 +1415,9 @@
     "times_skipped": 4,
     "procedure_cost": 320,
     "procedure_time_min": 90,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P072",
@@ -1293,7 +1435,9 @@
     "times_skipped": 0,
     "procedure_cost": 90,
     "procedure_time_min": 20,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P073",
@@ -1311,7 +1455,9 @@
     "times_skipped": 0,
     "procedure_cost": 175,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P074",
@@ -1329,7 +1475,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P075",
@@ -1347,7 +1495,9 @@
     "times_skipped": 0,
     "procedure_cost": 350,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P076",
@@ -1365,7 +1515,9 @@
     "times_skipped": 0,
     "procedure_cost": 70,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P077",
@@ -1383,7 +1535,9 @@
     "times_skipped": 0,
     "procedure_cost": 110,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P078",
@@ -1401,7 +1555,9 @@
     "times_skipped": 0,
     "procedure_cost": 130,
     "procedure_time_min": 30,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": true,
+    "consent": true
   },
   {
     "id": "P079",
@@ -1419,7 +1575,9 @@
     "times_skipped": 0,
     "procedure_cost": 180,
     "procedure_time_min": 45,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   },
   {
     "id": "P080",
@@ -1437,6 +1595,8 @@
     "times_skipped": 0,
     "procedure_cost": 150,
     "procedure_time_min": 60,
-    "phone": "+436765739553"
+    "phone": "+436765739553",
+    "opted_out": false,
+    "consent": true
   }
 ]
