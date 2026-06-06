@@ -25,6 +25,21 @@ international/expat patients** — which makes an **English-speaking** assistant
 (not a cop-out), with high slot value (€90–€450) and long, time-sensitive waitlists. All
 seed data, copy, call dialog, and the pitch are in **English**.
 
+## Status (updated 2026-06-06)
+
+The app is **built and runs** (Next.js + Prisma + SQLite). The full loop is **verified
+end-to-end in simulation** (`FONIO_LIVE=false`): cancel → rank → call → book / advance, with
+the consent gate and an audit trail. **Open item:** wire the real fonio outbound trigger in
+`src/lib/fonio.ts` (stub is commented) and set `FONIO_LIVE=true`.
+
+Run: `cp .env.example .env && npm install && npx prisma migrate dev && npm run seed && npm run dev`
+(→ http://localhost:3000, patient page `/p/demo`).
+
+⚠️ Two scoring implementations currently exist: `src/lib/scoring.ts` (TypeScript, in the live
+app) and Olha's `ranker.py` (richer — doctor match, procedure-duration filter, contact-result
+penalties). **Converge on the TS one**, port her logic in, and keep `procedure_cost` as a
+displayed KPI — NOT in the score (patient-benefit, not revenue). See `team-docs/MASTER.md` §14.
+
 ## Non-negotiables (from the brief — optimize for these)
 
 Judging weights: Functional MVP **30%**, Technical Execution **25%**, Problem Fit **20%**,
@@ -200,7 +215,7 @@ when real fields appear we change only the adapter — scoring and dashboard nev
 npm install
 cp .env.example .env        # fill in fonio creds from the provisioned account
 npx prisma migrate dev      # set up SQLite schema
-npx prisma db seed          # load dental demo data
+npm run seed                # load dental demo data
 npm run dev                 # dashboard + webhook endpoints
 ```
 

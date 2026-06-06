@@ -155,18 +155,20 @@ source into our model, so unknown real fields never break us.
   which strips `CLAUDE.md`, `team-docs/`, `scripts/`, the case PDF, secrets, and history → a clean
   single-commit repo judges see.
 
-**Get started (each teammate):**
+**Get started (each teammate) — the app is built ✅ and runs:**
 ```bash
 git clone <private-repo-url>
 cd "Start Hack"
-claude                 # CLAUDE.md auto-loads as context for your Claude Code
-# app setup (once scaffolded):
-npm install
-cp .env.example .env   # fill FONIO_API_KEY + DEMO_PHONE_1..3 (your own phones)
-npx prisma migrate dev
-npx prisma db seed
-npm run dev
+claude                  # CLAUDE.md auto-loads as context for your Claude Code
+
+cp .env.example .env    # has DATABASE_URL; FONIO_LIVE defaults to simulation (no keys needed)
+npm install             # installs deps + generates the Prisma client (postinstall)
+npx prisma migrate dev  # first time only: creates the local SQLite db
+npm run seed            # load the demo data (dental cohort + today's schedule)
+npm run dev             # → http://localhost:3000      patient page → /p/demo
 ```
+With `FONIO_LIVE=false` (default) calls are **simulated in-process**, so the whole loop is
+demoable with no phone. Set `FONIO_LIVE=true` + fill the keys to make calls real.
 - Each teammate needs their **own Claude Pro/Max** to run Claude Code.
 - **VS Code Live Share** = for pair-debugging on one screen; **GitHub** = the durable source of truth.
 - Never commit `.env` / secrets / the DB file (`.gitignore` handles this).
@@ -207,13 +209,29 @@ publish the clean repo, fill the Tally form.
 
 ## 11. Do-this-now (current status)
 
-- ✅ Step 1 — private repo pushed, teammates being added.
-- 🔄 Step 2 — **find the outbound-call endpoint** (More → Open Documentation / Outbound Campaigns)
-  and **create the API key** (More → API Keys → Create) → put in `.env`. Turn on Variable
-  Extraction on Lena and do a Test call to confirm structured output.
-- ⏭️ Step 3 — scaffold the Next.js app (Claude can do this once the endpoint is known).
-- ⏭️ Step 4 — close the live loop end-to-end.
-- ⏭️ Step 5 — dashboard + simulator + demo video.
+- ✅ Step 1 — private repo pushed, teammates added.
+- ✅ Step 2 — fonio account mapped; **Variable Extraction** confirmed as our structured-outcome
+  path (see `fonio-reference.md`). **One open item:** the outbound-call **trigger endpoint**
+  (More → Open Documentation / Outbound Campaigns) + create an **API key** (More → API Keys).
+- ✅ Step 3 — **Next.js app scaffolded, builds clean, loop verified end-to-end** (in simulation:
+  cancel → Lukas ranked top → booked; Hans excluded by the consent gate; KPIs + audit trail update).
+- 🔄 Step 4 — wire the **real fonio call** in `src/lib/fonio.ts` (the `fetch` is stubbed and
+  commented) and flip `FONIO_LIVE=true`. Until then calls are simulated.
+- ⏭️ Step 5 — **reconcile Olha's richer ranker + data into the app** (see §14), add the
+  no-answer→next demo path, polish, record the 3-min video.
+
+### The running app, in one picture
+```
+Schedule (cancel) ─┐                                  src/lib/
+Patient /p/demo  ──┼─► POST /api/slots/[id]/cancel ─► orchestrator.cancelSlot()
+ (Cancel)          │                                    ├─ scoring.ts   (rank waitlist, explainable)
+fonio inbound* ────┘                                    ├─ fonio.ts     (trigger call: sim | real)
+                                                        └─ handleOutcome → book / advance
+   webhook ◄── POST /api/fonio/outcome ◄── fonio (Variable Extraction)   *inbound = stretch
+   UI polls GET /api/state every 1.5s → StaffShell (Schedule / Recovery / Owner) + patient page
+```
+Files: `src/lib/{scoring,orchestrator,fonio,queries,db}.ts`, `src/app/StaffShell.tsx`,
+`src/app/p/[token]/`, `src/app/api/{state,slots/[id]/cancel,fonio/outcome}`.
 
 ---
 
@@ -234,7 +252,41 @@ publish the clean repo, fill the Tally form.
 | `team-docs/MASTER.md` | **this doc** — start here |
 | `CLAUDE.md` | guidance for Claude Code (root, auto-loaded) |
 | `team-docs/fonio-reference.md` | fonio account capabilities + spike checklist |
-| `prisma/schema.prisma` | data model (CORE vs ENRICHMENT) |
-| `prisma/seed.ts` | synthetic demo cohort + bulk population |
+| `team-docs/mockups/*` | the 4 design mockups (HTML + PNG) |
+| `prisma/schema.prisma` · `prisma/seed.ts` | data model + synthetic seed |
+| `src/lib/scoring.ts` | the dispatcher (patient-benefit, explainable) |
+| `src/lib/orchestrator.ts` | the loop (cancel → rank → call → book/advance) |
+| `src/lib/fonio.ts` | call trigger — simulated now, real stubbed |
+| `src/app/StaffShell.tsx` | staff UI (persona + Schedule/Recovery/Owner) |
+| `src/app/p/[token]/` | patient page + Cancel |
+| `src/app/api/*` | state / cancel / fonio outcome routes |
 | `scripts/publish-submission.sh` | builds the clean judge-facing public repo |
 | `README.md` | judge-facing front door (goes to the public repo) |
+| `ranker.py` · `waitlist_patients.json` · `doctors.json` | Olha's richer ranker + data — **to fold in, see §14** |
+
+---
+
+## 14. Teammate work & reconciliation (Olha's ranker)
+
+Olha built, in parallel (Python, standalone), a **richer ranker and dataset**:
+- `ranker.py` — weighted scorer with **hard filters** (joined-after-slot, procedure longer than
+  the slot, wrong doctor) + soft scoring (urgency, half-day + preferred-time distance, days on
+  waitlist, contact-attempt/result penalties, times-skipped fairness).
+- `waitlist_patients.json` — richer patients (condition, `assigned_doctor`, `preferred_time`,
+  `procedure_time_min`, `last_contact_result`, `times_skipped`, `procedure_cost`, phone…).
+- `doctors.json` — doctors with specialization + keywords (condition → right doctor).
+
+**Verdict: genuinely good — in several ways richer than the scaffold's `scoring.ts`.** Worth
+adopting: the **procedure-duration vs slot-length filter**, **doctor matching**, **preferred-time
+distance**, and **contact-result penalties**.
+
+**But two things to reconcile (we should converge on ONE brain):**
+1. **One implementation, not two.** The live web demo is the TS app; a separate Python script
+   isn't wired in. → **Port Olha's logic into `src/lib/scoring.ts`** (keep one runnable app) and
+   adopt her richer fields into `prisma/schema.prisma` + `seed.ts` (the adapter absorbs the rename).
+2. **Drop `procedure_cost` from the score.** Her weights give cost a small positive weight — that
+   re-introduces revenue into ranking, which we deliberately removed (patient-benefit, not money).
+   Keep cost as a **displayed KPI only**. Protects the ethics story the judges care about.
+
+Action: Dev 2 + Olha pick TS as the source of truth, port the ranker, unify the data model.
+Claude can do this port in one pass when you're ready.
