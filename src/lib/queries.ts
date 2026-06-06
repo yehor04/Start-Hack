@@ -56,11 +56,13 @@ export async function getActiveRecovery() {
 }
 
 export async function getDemoAppointment() {
-  // The patient page shows the booked implant slot today (our demo cancel target).
+  // The patient page shows our demo cancel target: the 17:30 Root canal (Maria Schmid), as seeded.
+  // Match by patient name; fall back to the LATEST booked slot (not the earliest) so the page still
+  // shows a real, cancellable appointment consistent with the dashboard demo narrative.
   return (
     (await db.slot.findFirst({
-      where: { status: "booked", treatment: "implant_consult", bookedPatientName: { not: null } },
-      orderBy: { startsAt: "asc" },
-    })) ?? (await db.slot.findFirst({ where: { status: "booked" }, orderBy: { startsAt: "asc" } }))
+      where: { status: "booked", bookedPatientName: "Maria Schmid" },
+      orderBy: { startsAt: "desc" },
+    })) ?? (await db.slot.findFirst({ where: { status: "booked" }, orderBy: { startsAt: "desc" } }))
   );
 }

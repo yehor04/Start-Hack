@@ -99,19 +99,27 @@ export async function callNext(slotId: string) {
   const next = ranked.find((r) => r.scored.eligible && !r.attempted);
   if (!next) return escalate(slotId, "waitlist exhausted");
 
-  const attempt = await db.recoveryAttempt.create({
-    data: {
-      slotId,
-      patientId: next.patientId,
-      status: "calling",
-      score: next.scored.score,
-      pAccept: next.scored.likelihood,
-      evEur: Math.round(next.scored.score * (slot.valueEur || 0)),
-      scoreBreakdown: JSON.stringify(next.scored.factors),
-      reasonText: next.scored.reason,
-      idempotencyKey: `${slotId}:${next.patientId}`,
-    },
-  });
+  let attempt;
+  try {
+    attempt = await db.recoveryAttempt.create({
+      data: {
+        slotId,
+        patientId: next.patientId,
+        status: "calling",
+        score: next.scored.score,
+        pAccept: next.scored.likelihood,
+        evEur: Math.round(next.scored.score * (slot.valueEur || 0)),
+        scoreBreakdown: JSON.stringify(next.scored.factors),
+        reasonText: next.scored.reason,
+        idempotencyKey: `${slotId}:${next.patientId}`,
+      },
+    });
+  } catch (e) {
+    // P2002 = unique violation on (slotId, patientId)/idempotencyKey: a concurrent outcome
+    // already queued this candidate. Someone else owns the next call — stop, don't double-dial.
+    if ((e as { code?: string }).code === "P2002") return;
+    throw e;
+  }
   await log("call_started", { slotId, patient: next.name, attemptId: attempt.id });
   await triggerCall({
     attemptId: attempt.id,
