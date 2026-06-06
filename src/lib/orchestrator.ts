@@ -192,6 +192,9 @@ export async function handleOutcome(attemptId: string, outcome: Outcome) {
 }
 
 async function escalate(slotId: string, why: string) {
-  await db.slot.update({ where: { id: slotId }, data: { status: "open" } });
+  // Distinct terminal status so the UI shows "needs human" instead of looking like it's still
+  // filling forever. The recovery loop does NOT auto-restart an escalated slot.
+  await db.slot.update({ where: { id: slotId }, data: { status: "escalated" } });
   await log("escalated", { slotId, why });
+  console.log(`🛑 ESCALATED slot ${slotId}: ${why} — needs a human.`);
 }

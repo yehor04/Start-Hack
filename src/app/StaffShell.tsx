@@ -128,10 +128,11 @@ function Schedule({ slots, onCancel, onView }: { slots: Slot[]; onCancel: (id: s
                   {sl.status === "filling" && <span className="st st-fill"><span className="pulse" /> Filling…</span>}
                   {sl.status === "filled" && <span className="st st-rec">✓ Recovered</span>}
                   {sl.status === "open" && <span className="st st-open">Open</span>}
+                  {sl.status === "escalated" && <span className="st st-open">⚠ Needs human</span>}
                 </td>
                 <td className="act">
                   {sl.status === "booked" && <button className="cancel" onClick={() => onCancel(sl.id)}>Cancel</button>}
-                  {(sl.status === "filling" || sl.status === "open") && <a className="link" onClick={onView} style={{ cursor: "pointer" }}>View in Recovery →</a>}
+                  {(sl.status === "filling" || sl.status === "open" || sl.status === "escalated") && <a className="link" onClick={onView} style={{ cursor: "pointer" }}>View in Recovery →</a>}
                   {sl.status === "filled" && <span className="recby">filled ✓</span>}
                 </td>
               </tr>
@@ -189,6 +190,8 @@ function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] 
               </div>
               {slot.status === "filled"
                 ? <div className="badge">✓ Recovered</div>
+                : slot.status === "escalated"
+                ? <div className="badge">⚠ Needs human</div>
                 : <div className="badge"><span className="pulse" /> {calling ? "Calling…" : "Filling…"}</div>}
             </div>
 
@@ -211,7 +214,7 @@ function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] 
                     <div className="cname">{c.name}</div>
                     <div className="chips">
                       {c.eligible ? (<>{urgencyChip(c.urgency)}<span className="chip g">Likely {Math.round(c.likelihood * 100)}%</span><span className="chip g">Consent ✓</span></>)
-                        : <span className="chip r">No outbound consent</span>}
+                        : <span className="chip r">{/consent/i.test(c.reason) ? "No outbound consent" : "Not eligible"}</span>}
                     </div>
                     <div className="reason">{c.reason}</div>
                   </div>

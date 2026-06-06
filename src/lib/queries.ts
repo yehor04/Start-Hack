@@ -29,7 +29,7 @@ export async function getActiveRecovery() {
     include: { slot: true },
   });
   const slot =
-    (lastAttempt?.slot && ["filling", "filled", "open"].includes(lastAttempt.slot.status)
+    (lastAttempt?.slot && ["filling", "filled", "open", "escalated"].includes(lastAttempt.slot.status)
       ? lastAttempt.slot
       : null) ?? (await db.slot.findFirst({ where: { status: "filling" } }));
   if (!slot) return null;
