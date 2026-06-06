@@ -64,19 +64,25 @@ Cancellation event ──► Orchestrator ──► Scoring engine ranks waitlis
             Live dashboard updates via SSE/WebSocket
 ```
 
-### fonio integration (the three primitives)
-- **Outbound Call API** — POST phone number + variables (`name`, `slot_time`, `treatment`,
-  `practice_name`) to trigger a real personalized call. This is the "call the candidate" half.
-- **API Request (post-processing)** — fonio calls *our* webhook with the call outcome
-  (yes/no/callback/voicemail) + captured data. This feeds the loop back.
-- **Inbound Webhook** — for the cancellation-by-phone path: fonio posts the caller number,
-  our response is injected into the assistant prompt via `{{variable}}`.
+### fonio integration (VERIFIED from the account — full detail in `team-docs/fonio-reference.md`)
+Account: trial to 2026-06-13. Assistant **Lena** is connected to **+493082687385** (our line).
 
-> ⚠️ FIRST TASK (we have account access): **spike the real API** — place one throwaway
-> outbound call and capture EXACTLY what the outcome webhook sends (structured intent? or
-> just a transcript? is voicemail detected? what's the latency?). Build the fonio client +
-> state machine only after this is known. If outcomes aren't structured, add a one-shot LLM
-> classifier over the transcript. Do NOT hardcode unverified payloads.
+- **⭐ Variable Extraction = structured outcome.** fonio fills a JSON schema we define from the
+  call (it ships a `name`/`anliegen` example). We define `accepted` (bool/null),
+  `callback_requested` (bool/null), `preferred_alternative` (string/null), `reason_declined`.
+  → **No transcript-parsing needed for the happy path.** This retires the big risk.
+- **Webhooks (outbound)** — after the call fonio POSTs call data (extracted variables +
+  transcript + summary) to our endpoint = our outcome webhook (`/api/fonio/outcome`).
+- **Custom Prompt / Instructions** — the recovery-call script, personalized per call.
+- **Book Appointments / Send SMS / Send Email** — native; optional confirmation SMS on "yes".
+- Limits: max call 20 min; max silence wait 10 s; guardrails always on.
+- ⚠️ **Automatic Deletion**: if the callee declines recording, NO extraction runs → handle
+  recording consent in the prompt (announce + proceed).
+
+> ⚠️ THE ONE OPEN ITEM: find the **outbound-call TRIGGER endpoint** (REST API to start a call
+> with phone + variables) + its auth/API key — under More/Settings/API or Webhooks/Integrations.
+> Everything else (structured outcome, delivery, script) is confirmed. The in-app **Test call**
+> works meanwhile. See the spike checklist in `team-docs/fonio-reference.md`.
 
 ## Tech stack
 
