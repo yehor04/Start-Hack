@@ -11,16 +11,19 @@ handle yes / no / callback / voicemail → book the slot or advance to the next 
 a live dashboard shows the receptionist what's happening and the owner the weekly numbers.
 
 **Track:** fonio.ai · **Code freeze:** Sunday, June 7, 14:00 sharp.
-**Chosen angle (the niche):** *Yield management for the empty chair.* We reframe the
-problem from "call the waitlist" to "the empty appointment is **perishable inventory** —
-maximize recovered revenue per minute before it goes cold." The hero is an
-**expected-value dispatcher** (`pAccept × slotValue × fit`), proven with **hard numbers
-from a simulation harness**, and **explainable/auditable** for GDPR. fonio owns voice
-quality; we own the quant brain around the calls. See *Differentiation* below.
+**Chosen angle (the niche):** *The empty chair is perishable inventory.* We reframe the
+problem from "call the waitlist" to "recover the slot for the patient who most needs it and
+is most likely to show up — before it goes cold." The hero is a **patient-benefit
+dispatcher** that ranks by `urgency × likelihoodToAttend × fit` (NOT by revenue — see
+*Objective & ethics*), is **explainable/auditable** for GDPR, and is backed by a
+**simulation harness** for policy analysis. Revenue recovered is shown as a business KPI,
+not the thing we optimize. fonio owns voice quality; we own the dispatch brain. See
+*Differentiation* below.
 
-**Medical context (pick one and own it):** a **private dental / implantology** practice —
-high slot value (€90–€450) and long, time-sensitive waitlists, so the revenue-recovery
-story has real money behind it. All seed data, copy, and the demo persona are dental.
+**Medical context:** a **private dental / implantology** practice **in Vienna serving
+international/expat patients** — which makes an **English-speaking** assistant in-character
+(not a cop-out), with high slot value (€90–€450) and long, time-sensitive waitlists. All
+seed data, copy, call dialog, and the pitch are in **English**.
 
 ## Non-negotiables (from the brief — optimize for these)
 
@@ -40,7 +43,8 @@ UX & Design **15%**, Pitch **10%**.
    surface what needs a human. Demo at least one edge case.
 6. **Dashboard a receptionist would actually use** and numbers an owner can read: refill
    rate, revenue recovered, attempts per slot, outcomes by reason.
-7. **One language, done well:** German *or* English. Default: **German** (DACH market fit).
+7. **Language: English**, done well (brief allows German or English). Persona = a Vienna
+   clinic serving international patients, so English is in-character.
 8. **Be honest in the README** about what's real vs. mocked.
 
 ## Architecture
@@ -68,9 +72,11 @@ Cancellation event ──► Orchestrator ──► Scoring engine ranks waitlis
 - **Inbound Webhook** — for the cancellation-by-phone path: fonio posts the caller number,
   our response is injected into the assistant prompt via `{{variable}}`.
 
-> The exact payload shapes, auth, and endpoints come from the **pre-provisioned fonio
-> account API docs** (inside the account; credentials via Discord/email). Confirm them with
-> a throwaway test call before building on assumptions. Do NOT hardcode unverified payloads.
+> ⚠️ FIRST TASK (we have account access): **spike the real API** — place one throwaway
+> outbound call and capture EXACTLY what the outcome webhook sends (structured intent? or
+> just a transcript? is voicemail detected? what's the latency?). Build the fonio client +
+> state machine only after this is known. If outcomes aren't structured, add a one-shot LLM
+> classifier over the transcript. Do NOT hardcode unverified payloads.
 
 ## Tech stack
 
@@ -93,43 +99,55 @@ Cancellation event ──► Orchestrator ──► Scoring engine ranks waitlis
   score_breakdown (JSON), reason_text, created_at, resolved_at.
 - `Outcome` / event log — append-only audit of everything for the dashboard timeline.
 
-## Scoring engine (the hero — keep it explainable)
+## Scoring engine (the hero — patient-benefit, explainable)
 
-**Expected value, not just a rank.** For each eligible candidate compute
-`EV = pAccept × slotValueEur × fitMultiplier`, where:
-- `pAccept` — propensity to say yes to *this* slot at *this* time: `acceptRate` prior +
-  time/day preference match − recent-contact penalty. Missing fields → neutral 0.5.
-- `slotValueEur` — perishable value recovered if they book.
-- `fitMultiplier` — urgency + treatment match + fairness (down-weight recently offered).
+### Objective & ethics
+We rank by **patient benefit**, not money: `priority = urgency × likelihoodToAttend × fit`.
+Revenue recovered is a **displayed KPI**, never the optimization target — in healthcare,
+calling the lucrative patient over the one in pain is the wrong (and bad-looking) thing.
+This is also the better Problem-Fit answer for the judges.
+
+### The score
+For each eligible candidate:
+- `urgency` — clinical/wait urgency (waitlist urgency + how long they've waited).
+- `likelihoodToAttend` — a transparent **heuristic prior** (NOT a fake "learned" rate — own
+  this): `acceptRate` prior + time/day preference match − recent-contact penalty − no-show
+  penalty. Missing fields → neutral 0.5.
+- `fit` — treatment match + fairness (down-weight recently offered, so we don't always ring
+  the same person first).
 
 **Consent is a hard gate** (no consent ⇒ ineligible, never scored). Every factor is
 **optional and degrades gracefully** (missing enrichment → neutral contribution, never a
 crash) — this is how we absorb not knowing a real source's exact fields. Persist the full
 `scoreBreakdown` per attempt and generate a one-line counterfactual rationale ("called
-Lukas over Maria: same treatment, but Maria prefers mornings and was contacted
-yesterday"). Weights live in one config object, tunable live.
+Lukas over Maria: same treatment, both available, but Maria prefers mornings and was
+contacted yesterday"). Weights live in one config object, tunable live.
 
 ## Differentiation (everyone will use Claude — here's why we win)
 
 Most teams ship "cancellation → call first person → book." We go niche on three axes:
-1. **Expected-value dispatcher** — perishable-inventory framing (airline/hotel yield
-   management applied to clinic chairs), not a flat heuristic. Quant-flavored, defensible.
-2. **Simulation harness with real numbers** — not just one happy call; a live **A/B over
-   100+ simulated cancellations** (naive "call-first" vs Refill) showing **fill-rate,
-   revenue-recovered, and time-to-fill uplift** on the dashboard. Almost nobody else will
-   have numbers.
+1. **Patient-benefit dispatcher** — perishable-inventory *framing*, but the objective is
+   "right patient, will show up", with consent + fairness baked in. Defensible, not a flat
+   heuristic, and not the ethically-iffy revenue-max version.
+2. **Simulation harness for policy analysis** — beyond one happy call, an **A/B over 100+
+   simulated cancellations** (naive "call-first" vs Refill) on the dashboard. **Framing
+   matters:** present it honestly as *how the policy behaves* (fill-rate, time-to-fill,
+   right-patient match), NOT "proof we're 2× better" — the data is synthetic and a sharp
+   judge will call out a rigged benchmark. Honest > impressive-but-fragile.
 3. **Explainable + auditable** — counterfactual "why this patient" + full per-decision
    audit trail. Serves the GDPR/healthcare trust angle the partner cares about.
 
-The real live call still happens (mandatory for the 30% MVP). The simulator proves it
-works *at scale*; the live call proves it's *real*.
+The real live call still happens (mandatory for the 30% MVP) and is the most fragile part,
+so **record a clean backup video the moment the loop works.** The simulator is demo
+insurance + shows behavior at scale; the live call proves it's real.
 
 ## Simulation harness
 
 A `simulator` module replays a stream of cancellation events against the seeded population,
-runs both the naive baseline and the EV dispatcher, and records fill-rate, time-to-fill,
-and revenue recovered. Powers the dashboard's A/B panel. Deterministic (seeded RNG) so the
-demo is reproducible. The bulk seed population exists for exactly this.
+runs both the naive baseline and the patient-benefit dispatcher, and records fill-rate,
+time-to-fill, and revenue recovered. Powers the dashboard's A/B panel. Deterministic
+(seeded RNG) so the demo is reproducible. **Build only AFTER the live loop is green** — it
+is NOT in the 30% critical path. Frame results as policy behavior, not proof of uplift.
 
 ## Data layer & adapter
 
@@ -165,8 +183,9 @@ when real fields appear we change only the adapter — scoring and dashboard nev
 4. Slot **books live**; metrics tick up (refill rate, revenue recovered).
 5. **Edge case:** trigger the second slot where the top candidate doesn't answer → system
    auto-advances to the next candidate. Show it degrade cleanly.
-6. **The proof:** open the A/B panel — Refill vs naive "call-first" over 100+ simulated
-   cancellations: higher fill-rate, more revenue recovered, faster time-to-fill.
+6. **The policy view:** open the A/B panel — Refill vs naive "call-first" over 100+
+   simulated cancellations: higher fill-rate, faster time-to-fill, right-patient match
+   (revenue recovered shown as a KPI). Present honestly as policy behavior on synthetic data.
 
 ## Dev commands
 
@@ -178,8 +197,10 @@ npx prisma db seed          # load dental demo data
 npm run dev                 # dashboard + webhook endpoints
 ```
 
-For local fonio webhook testing, expose the dev server with a tunnel (e.g. `ngrok http 3000`)
-and register the public URL as the API Request / Inbound Webhook target in fonio.
+fonio needs a public HTTPS URL for the outcome webhook. **Preferred: deploy to Vercel**
+early (`vercel`) for a stable URL to register in fonio — more reliable than a tunnel during
+the hack. Local fallback: `ngrok http 3000`. Register the URL as the fonio API Request /
+Inbound Webhook target.
 
 ## Submission checklist (don't lose easy points)
 
@@ -195,5 +216,6 @@ and register the public URL as the API Request / Inbound Webhook target in fonio
 ## Team
 
 - Dev 1 — fonio/telephony: outbound trigger, webhooks, state machine, idempotency, consent.
-- Dev 2 — brain: EV dispatcher + propensity + LLM rationale, seed data, simulation harness.
+- Dev 2 — brain: patient-benefit dispatcher + likelihood-to-attend + LLM rationale, seed
+  data, simulation harness (after the loop is green).
 - Dev 3 — cockpit: live dashboard, metrics, A/B uplift panel, overrides, demo video.
