@@ -3,255 +3,229 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Refill — Dashboard mockup</title>
+<title>Refill — Recovery cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F6F6F8; --card:#FFFFFF; --ink:#0B0B0F; --muted:#6B6B76; --line:#ECECEF;
-    --indigo:#5B5BD6; --indigo-soft:#EEEEFC; --green:#16A34A; --green-soft:#E9F7EF;
-    --amber:#B45309; --amber-soft:#FBF1E4; --red:#B91C1C; --grey-soft:#F1F1F3;
-    --radius:16px; --shadow:0 1px 2px rgba(11,11,15,.04),0 8px 24px rgba(11,11,15,.04);
+    --paper:#FAF8F3; --card:#FFFFFF; --ink:#181610; --ink2:#3B382F; --muted:#86827A;
+    --line:#EBE7DE; --line2:#F2EFE8;
+    --green:#0F6B43; --green2:#15885A; --green-soft:#E8F1EA; --mint:#CDE7D6;
+    --clay:#B4532A; --red:#A93426; --red-soft:#F6E7E3; --amber:#B07A12; --amber-soft:#F6EED9;
+    --r:18px; --shadow:0 1px 2px rgba(24,22,16,.04),0 10px 30px rgba(24,22,16,.05);
+    --serif:"Fraunces",Georgia,serif; --sans:"Inter Tight",-apple-system,"Segoe UI",sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1360px;margin:0 auto;padding:22px 26px 30px;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;font-feature-settings:"ss01";}
+  .num{font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1280px;margin:0 auto;padding:26px 32px 38px;}
 
-  /* header */
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-  .brand{display:flex;align-items:center;gap:12px;}
-  .logo{font-size:23px;font-weight:800;letter-spacing:-.02em;}
-  .logo b{color:var(--indigo);}
-  .sub{color:var(--muted);font-size:13px;border-left:1px solid var(--line);padding-left:12px;}
-  .hgroup{display:flex;align-items:center;gap:10px;}
+  /* top bar */
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  .mark{width:30px;height:30px;border-radius:9px;background:var(--green);position:relative;}
+  .mark::after{content:"";position:absolute;inset:9px 0 0 9px;width:12px;height:12px;border-radius:50%;
+    border:2.5px solid #fff;border-right-color:transparent;transform:rotate(35deg);}
+  .wordmark{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:-.01em;}
+  .topright{display:flex;align-items:center;gap:12px;}
+  .seg{display:flex;background:#F0ECE3;border:1px solid var(--line);border-radius:11px;padding:4px;gap:3px;}
+  .seg div{padding:7px 15px;font-size:13px;font-weight:550;color:var(--muted);border-radius:8px;}
+  .seg .on{background:#fff;color:var(--ink);box-shadow:var(--shadow);}
   .live{display:flex;align-items:center;gap:7px;background:var(--green-soft);color:var(--green);
-    font-weight:600;font-size:12.5px;padding:7px 12px;border-radius:999px;}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.18);}
-  .btn{background:var(--ink);color:#fff;border:none;border-radius:11px;padding:11px 16px;
-    font-size:13.5px;font-weight:600;cursor:pointer;}
+    font-weight:600;font-size:12.5px;padding:8px 13px;border-radius:999px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green2);box-shadow:0 0 0 3px rgba(21,136,90,.18);}
+  .avatar{width:34px;height:34px;border-radius:50%;background:#1F1C16;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
 
-  /* kpi row */
-  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px;}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:16px 16px 15px;box-shadow:var(--shadow);}
-  .kpi .lab{color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
-  .kpi .val{font-size:27px;font-weight:800;letter-spacing:-.02em;margin-top:8px;}
-  .kpi .delta{font-size:12px;margin-top:6px;font-weight:600;}
-  .up{color:var(--green);} .muted{color:var(--muted);font-weight:500;}
+  /* tabs row */
+  .tabsrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .tabs{display:flex;gap:4px;background:#F0ECE3;border:1px solid var(--line);border-radius:11px;padding:4px;}
+  .tab{padding:8px 18px;border-radius:8px;font-size:13.5px;font-weight:550;color:var(--muted);}
+  .tab.on{background:#fff;color:var(--ink);box-shadow:var(--shadow);}
+  .tmeta{font-size:12.5px;color:var(--muted);}
+
+  /* kpi strip */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);}
+  .kpi .lab{font-size:12px;color:var(--muted);font-weight:550;}
+  .kpi .v{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:-.01em;margin-top:9px;}
+  .kpi .d{font-size:11.5px;font-weight:600;margin-top:6px;color:var(--green2);}
+  .kpi .d.m{color:var(--muted);font-weight:500;}
 
   /* main grid */
-  .grid{display:grid;grid-template-columns:1.62fr 1fr;gap:16px;}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:var(--shadow);}
-  .card .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);}
-  .card .hd h2{margin:0;font-size:15px;font-weight:700;}
-  .card .hd .meta{color:var(--muted);font-size:12.5px;}
-  .pad{padding:16px 18px;}
+  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);}
+  .ph{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 6px;}
+  .ph h3{margin:0;font-size:15px;font-weight:600;}
+  .ph .mt{font-size:12.5px;color:var(--muted);}
+  .pb{padding:14px 20px 20px;}
 
-  /* active slot */
-  .slot{display:flex;align-items:center;justify-content:space-between;background:var(--indigo-soft);
-    border:1px solid #E2E2FA;border-radius:13px;padding:14px 16px;}
-  .slot .t{font-weight:700;font-size:15px;}
-  .slot .d{color:var(--muted);font-size:12.5px;margin-top:3px;}
-  .badge{font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;}
-  .b-fill{background:#fff;color:var(--indigo);border:1px solid #D9D9F7;}
-  .callrow{display:flex;align-items:center;gap:13px;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;}
-  .av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-weight:700;font-size:14px;color:#fff;flex:0 0 38px;}
-  .av.l{background:#5B5BD6;} .av.s{background:#0EA5A4;} .av.m{background:#9CA3AF;} .av.h{background:#C7C7CF;}
-  .wave{display:flex;align-items:center;gap:3px;height:20px;margin-left:auto;}
-  .wave i{width:3px;background:var(--indigo);border-radius:2px;display:block;}
-  .calling{color:var(--indigo);font-weight:700;font-size:12.5px;}
+  /* slot banner */
+  .slot{display:flex;align-items:center;justify-content:space-between;background:var(--green-soft);
+    border:1px solid var(--mint);border-radius:14px;padding:15px 17px;}
+  .slot .t{font-weight:700;font-size:15.5px;}
+  .slot .d{color:#3a5249;font-size:12.5px;margin-top:3px;}
+  .badge{font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:999px;background:#fff;color:var(--green);border:1px solid var(--mint);display:inline-flex;align-items:center;gap:6px;}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--green2);}
 
-  /* candidate list */
-  .cands{margin-top:6px;}
-  .cand{display:flex;align-items:center;gap:13px;padding:13px 14px;border:1px solid var(--line);
-    border-radius:13px;margin-top:10px;}
-  .cand.active{border-color:#C9C9F4;background:#FBFBFF;box-shadow:0 0 0 3px rgba(91,91,214,.07);}
-  .cand.dim{opacity:.62;}
+  .callrow{display:flex;align-items:center;gap:13px;margin-top:13px;padding:13px 15px;border:1px solid var(--line);border-radius:14px;}
+  .av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex:0 0 38px;}
+  .av.l{background:#0F6B43;} .av.s{background:#1C8A66;} .av.m{background:#A7A296;} .av.h{background:#CFC9BD;}
+  .calling{color:var(--green);font-weight:600;font-size:12.5px;margin-top:2px;}
+  .nm13{font-size:13.5px;font-weight:700;}
+  .wave{display:flex;align-items:center;gap:3px;height:22px;margin-left:auto;}
+  .wave i{width:3px;background:var(--green);border-radius:2px;display:block;}
+
+  /* candidate cards */
+  .cands{margin-top:8px;}
+  .cand{display:flex;align-items:center;gap:13px;padding:14px 15px;border:1px solid var(--line);border-radius:14px;margin-top:11px;}
+  .cand.active{border-color:var(--mint);background:#F4FAF6;box-shadow:0 0 0 3px rgba(15,107,67,.06);}
+  .cand.dim{opacity:.6;}
   .cand .name{font-weight:700;font-size:14px;}
-  .chips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
-  .chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--grey-soft);color:#44444C;}
+  .chips{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+  .chip{font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px;background:#F1EDE4;color:#5b574d;}
   .chip.g{background:var(--green-soft);color:var(--green);}
-  .chip.i{background:var(--indigo-soft);color:var(--indigo);}
   .chip.a{background:var(--amber-soft);color:var(--amber);}
-  .chip.r{background:#FBEAEA;color:var(--red);}
-  .reason{color:var(--muted);font-size:12px;margin-top:7px;line-height:1.45;}
-  .score{flex:0 0 132px;display:flex;flex-direction:column;align-items:flex-end;gap:7px;}
-  .snum{font-weight:800;font-size:16px;letter-spacing:-.01em;}
-  .snum small{color:var(--muted);font-weight:600;font-size:11px;}
-  .bar{width:120px;height:6px;border-radius:4px;background:var(--grey-soft);overflow:hidden;}
-  .bar i{display:block;height:100%;border-radius:4px;background:var(--indigo);}
-  .pill{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;}
-  .p-call{background:var(--indigo);color:#fff;}
-  .p-queue{background:var(--grey-soft);color:#44444C;}
-  .p-skip{background:var(--amber-soft);color:var(--amber);}
-  .p-inel{background:#FBEAEA;color:var(--red);}
+  .chip.r{background:var(--red-soft);color:var(--red);}
+  .reason{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5;}
+  .reason b{color:var(--ink2);font-weight:600;}
+  .score{flex:0 0 130px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  .snum{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:-.01em;}
+  .snum small{font-family:var(--sans);color:var(--muted);font-weight:600;font-size:11px;}
+  .bar{width:118px;height:6px;border-radius:4px;background:#F1EDE4;overflow:hidden;}
+  .bar i{display:block;height:100%;border-radius:4px;background:var(--green);}
+  .pill{font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;}
+  .p-call{background:var(--green);color:#fff;} .p-queue{background:#F1EDE4;color:#5b574d;}
+  .p-skip{background:var(--amber-soft);color:var(--amber);} .p-inel{background:var(--red-soft);color:var(--red);}
 
   /* right column */
-  .tl{position:relative;padding-left:6px;}
-  .ev{display:flex;gap:12px;padding:9px 0;}
-  .ev .tdot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex:0 0 10px;}
-  .t-g{background:var(--green);} .t-i{background:var(--indigo);} .t-m{background:#C7C7CF;} .t-a{background:#E0A33A;}
-  .ev .tx{font-size:12.5px;line-height:1.4;}
-  .ev .tx b{font-weight:700;}
-  .ev .tm{color:var(--muted);font-size:11px;margin-top:2px;}
+  .controls{display:flex;gap:9px;flex-wrap:wrap;}
+  .ctl{flex:1;min-width:0;text-align:center;border:1px solid var(--line);background:#fff;border-radius:11px;
+    padding:11px 8px;font-size:12.5px;font-weight:600;color:var(--ink2);}
+  .ctl.stop{color:var(--red);border-color:var(--red-soft);}
 
-  .ab{margin-top:2px;}
-  .abrow{display:flex;align-items:center;gap:12px;margin-top:13px;}
-  .abrow .nm{flex:0 0 86px;font-size:12.5px;font-weight:600;}
-  .abrow .track{flex:1;height:24px;border-radius:7px;background:var(--grey-soft);position:relative;overflow:hidden;}
-  .abrow .track i{display:block;height:100%;border-radius:7px;}
-  .abrow .track span{position:absolute;right:9px;top:3px;font-size:12px;font-weight:800;color:#fff;}
-  .fill-ours{background:var(--indigo);} .fill-naive{background:#B9B9C2;}
-  .note{color:var(--muted);font-size:11px;margin-top:12px;line-height:1.45;}
-  .legend{display:flex;gap:16px;margin-top:8px;font-size:11.5px;color:var(--muted);}
-  .legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+  .tl{margin-top:2px;}
+  .ev{display:flex;gap:12px;padding:9px 0;}
+  .ev .tdot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:0 0 9px;}
+  .t-g{background:var(--green2);} .t-i{background:var(--green);} .t-m{background:#CFC9BD;} .t-a{background:#D9B873;}
+  .ev .tx{font-size:12.5px;line-height:1.45;} .ev .tx b{font-weight:700;}
+  .ev .tm{color:var(--muted);font-size:11px;margin-top:2px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header>
-    <div class="brand">
-      <div class="logo">Re<b>fill</b></div>
-      <div class="sub">Vienna Smile Dental — reception cockpit</div>
-    </div>
-    <div class="hgroup">
+  <div class="top">
+    <div class="brand"><div class="mark"></div><div class="wordmark">Refill</div></div>
+    <div class="topright">
+      <div class="seg"><div class="on">Reception</div><div>Owner</div></div>
       <div class="live"><span class="dot"></span> Live</div>
-      <button class="btn">＋ Simulate cancellation</button>
+      <div class="avatar">AD</div>
     </div>
-  </header>
+  </div>
 
-  <!-- KPIs -->
+  <div class="tabsrow">
+    <div class="tabs"><div class="tab">Schedule</div><div class="tab on">Recovery</div></div>
+    <div class="tmeta">Cancellation detected 14:21 · auto-dispatching</div>
+  </div>
+
+  <!-- KPI strip -->
   <div class="kpis">
-    <div class="kpi"><div class="lab">Refill rate (today)</div><div class="val">68%</div><div class="delta up">▲ vs 31% manual</div></div>
-    <div class="kpi"><div class="lab">Revenue recovered</div><div class="val">€2,140</div><div class="delta muted">7 slots · today</div></div>
-    <div class="kpi"><div class="lab">Avg time-to-fill</div><div class="val">1m 48s</div><div class="delta up">▲ faster than dialing</div></div>
-    <div class="kpi"><div class="lab">Attempts / slot</div><div class="val">1.6</div><div class="delta muted">calls per filled slot</div></div>
-    <div class="kpi"><div class="lab">Open slots</div><div class="val">1</div><div class="delta muted">being filled now</div></div>
+    <div class="kpi"><div class="lab">Open now</div><div class="v num">1</div><div class="d m">being filled</div></div>
+    <div class="kpi"><div class="lab">On call</div><div class="v num">1</div><div class="d m">Lukas Bauer</div></div>
+    <div class="kpi"><div class="lab">Recovered today</div><div class="v num">6 · €1,910</div><div class="d">▲ 2 vs yesterday</div></div>
+    <div class="kpi"><div class="lab">Avg time-to-fill</div><div class="v num">1m 52s</div><div class="d">▲ vs ~14 min by hand</div></div>
   </div>
 
   <div class="grid">
 
-    <!-- LEFT -->
-    <div class="card">
-      <div class="hd">
-        <h2>Active recovery</h2>
-        <div class="meta">Cancellation detected 14:21 · auto-dispatching</div>
-      </div>
-      <div class="pad">
+    <!-- LEFT: active recovery -->
+    <div class="panel">
+      <div class="ph"><h3>Active recovery</h3><div class="mt">Thu 17:30 · implant consultation</div></div>
+      <div class="pb">
 
         <div class="slot">
           <div>
             <div class="t">Thu 17:30 · Implant consultation</div>
             <div class="d">Dr. Berger · OP 1 · 30 min · €450 value</div>
           </div>
-          <div class="badge b-fill">● Filling…</div>
+          <div class="badge"><span class="pulse"></span> Filling…</div>
         </div>
 
         <div class="callrow">
           <div class="av l">L</div>
           <div>
-            <div class="name" style="font-size:13.5px">Lukas Bauer</div>
+            <div class="nm13">Lukas Bauer</div>
             <div class="calling">On call via fonio · +49 30 82687385 · 00:42</div>
           </div>
           <div class="wave">
-            <i style="height:7px"></i><i style="height:14px"></i><i style="height:20px"></i>
-            <i style="height:11px"></i><i style="height:17px"></i><i style="height:8px"></i>
-            <i style="height:15px"></i><i style="height:20px"></i><i style="height:10px"></i>
+            <i style="height:8px"></i><i style="height:15px"></i><i style="height:21px"></i><i style="height:12px"></i>
+            <i style="height:18px"></i><i style="height:9px"></i><i style="height:16px"></i><i style="height:21px"></i><i style="height:11px"></i>
           </div>
         </div>
 
         <div class="cands">
-
-          <!-- 1 -->
           <div class="cand active">
             <div class="av l">L</div>
             <div style="flex:1">
               <div class="name">Lukas Bauer</div>
-              <div class="chips">
-                <span class="chip a">Urgency: high</span>
-                <span class="chip g">Evening match</span>
-                <span class="chip i">Likely yes 85%</span>
-                <span class="chip g">Consent ✓</span>
-              </div>
+              <div class="chips"><span class="chip a">Urgency: high</span><span class="chip g">Evening match</span><span class="chip g">Likely yes 85%</span><span class="chip g">Consent ✓</span></div>
               <div class="reason"><b>Top pick.</b> High urgency, prefers evenings (fits 17:30), not contacted recently.</div>
             </div>
-            <div class="score">
-              <div class="snum">0.86</div>
-              <div class="bar"><i style="width:86%"></i></div>
-              <div class="pill p-call">Calling now</div>
-            </div>
+            <div class="score"><div class="snum num">0.86</div><div class="bar"><i style="width:86%"></i></div><div class="pill p-call">Calling now</div></div>
           </div>
 
-          <!-- 2 -->
           <div class="cand">
             <div class="av s">S</div>
             <div style="flex:1">
               <div class="name">Sophie Mayer</div>
-              <div class="chips">
-                <span class="chip a">Urgency: med</span>
-                <span class="chip g">Evening match</span>
-                <span class="chip i">Likely yes 75%</span>
-                <span class="chip g">Consent ✓</span>
-              </div>
-              <div class="reason"><b>Next in line.</b> Strong evening fit, no recent contact — called if Lukas declines or doesn't answer.</div>
+              <div class="chips"><span class="chip a">Urgency: med</span><span class="chip g">Evening match</span><span class="chip g">Likely yes 75%</span><span class="chip g">Consent ✓</span></div>
+              <div class="reason"><b>Next in line.</b> Strong evening fit, no recent contact — called if Lukas declines or doesn’t answer.</div>
             </div>
-            <div class="score">
-              <div class="snum">0.74</div>
-              <div class="bar"><i style="width:74%"></i></div>
-              <div class="pill p-queue">Queued</div>
-            </div>
+            <div class="score"><div class="snum num">0.74</div><div class="bar"><i style="width:74%"></i></div><div class="pill p-queue">Queued</div></div>
           </div>
 
-          <!-- 3 -->
           <div class="cand">
             <div class="av m">M</div>
             <div style="flex:1">
               <div class="name">Maria Huber</div>
-              <div class="chips">
-                <span class="chip">Prefers mornings</span>
-                <span class="chip a">Called yesterday</span>
-                <span class="chip">2 past no-shows</span>
-                <span class="chip g">Consent ✓</span>
-              </div>
-              <div class="reason"><b>Deprioritized.</b> Prefers mornings (slot is evening), contacted yesterday, low attendance history.</div>
+              <div class="chips"><span class="chip">Prefers mornings</span><span class="chip a">Called yesterday</span><span class="chip">2 past no-shows</span><span class="chip g">Consent ✓</span></div>
+              <div class="reason"><b>Deprioritised.</b> Prefers mornings (slot is evening), contacted yesterday, low attendance history.</div>
             </div>
-            <div class="score">
-              <div class="snum">0.29</div>
-              <div class="bar"><i style="width:29%"></i></div>
-              <div class="pill p-skip">Low priority</div>
-            </div>
+            <div class="score"><div class="snum num">0.29</div><div class="bar"><i style="width:29%"></i></div><div class="pill p-skip">Low priority</div></div>
           </div>
 
-          <!-- 4 -->
           <div class="cand dim">
             <div class="av h">H</div>
             <div style="flex:1">
               <div class="name">Hans Gruber</div>
-              <div class="chips">
-                <span class="chip r">No outbound consent</span>
-              </div>
-              <div class="reason"><b>Ineligible.</b> No consent for outbound calls — excluded by the GDPR consent gate, never dialed.</div>
+              <div class="chips"><span class="chip r">No outbound consent</span></div>
+              <div class="reason"><b>Ineligible.</b> No consent for outbound calls — excluded by the GDPR consent gate, never dialled.</div>
             </div>
-            <div class="score">
-              <div class="snum">—<small> n/a</small></div>
-              <div class="bar"><i style="width:0%"></i></div>
-              <div class="pill p-inel">Excluded</div>
-            </div>
+            <div class="score"><div class="snum num">—<small> n/a</small></div><div class="bar"><i style="width:0%"></i></div><div class="pill p-inel">Excluded</div></div>
           </div>
-
         </div>
       </div>
     </div>
 
     <!-- RIGHT -->
-    <div style="display:flex;flex-direction:column;gap:16px;">
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="panel">
+        <div class="ph"><h3>Human control</h3><div class="mt">you’re always in the loop</div></div>
+        <div class="pb">
+          <div class="controls">
+            <div class="ctl">Skip candidate</div>
+            <div class="ctl">Pause auto-dial</div>
+            <div class="ctl">Call manually</div>
+          </div>
+          <div class="controls" style="margin-top:9px"><div class="ctl stop">Stop recovery for this slot</div></div>
+        </div>
+      </div>
 
-      <div class="card">
-        <div class="hd"><h2>Live activity</h2><div class="meta">audit trail</div></div>
-        <div class="pad">
+      <div class="panel">
+        <div class="ph"><h3>Live activity</h3><div class="mt">audit trail</div></div>
+        <div class="pb">
           <div class="tl">
             <div class="ev"><div class="tdot t-i"></div><div class="tx"><b>Calling Lukas Bauer</b> — offering Thu 17:30 implant slot<div class="tm">14:21:58 · in progress</div></div></div>
             <div class="ev"><div class="tdot t-i"></div><div class="tx"><b>Ranked 4 candidates</b> — 1 excluded (consent), top score 0.86<div class="tm">14:21:55</div></div></div>
@@ -262,24 +236,8 @@
           </div>
         </div>
       </div>
-
-      <div class="card">
-        <div class="hd"><h2>Dispatcher vs manual</h2><div class="meta">100 simulated cancellations</div></div>
-        <div class="pad ab">
-          <div style="font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:2px;">Slots filled</div>
-          <div class="abrow"><div class="nm">Refill</div><div class="track"><i class="fill-ours" style="width:68%"></i><span>68%</span></div></div>
-          <div class="abrow"><div class="nm">Call-first</div><div class="track"><i class="fill-naive" style="width:31%"></i><span style="color:#44444C">31%</span></div></div>
-
-          <div style="font-size:12.5px;font-weight:600;color:var(--muted);margin:16px 0 2px;">Avg time-to-fill</div>
-          <div class="abrow"><div class="nm">Refill</div><div class="track"><i class="fill-ours" style="width:34%"></i><span>1m 48s</span></div></div>
-          <div class="abrow"><div class="nm">Call-first</div><div class="track"><i class="fill-naive" style="width:92%"></i><span style="color:#44444C">6m 10s</span></div></div>
-
-          <div class="legend"><span><i style="background:var(--indigo)"></i>Refill</span><span><i style="background:#B9B9C2"></i>Call-first (naive)</span></div>
-          <div class="note">Policy behavior on synthetic data — illustrates how candidate selection changes outcomes, not a production benchmark.</div>
-        </div>
-      </div>
-
     </div>
+
   </div>
 </div>
 </body>

@@ -3,145 +3,119 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Refill — Schedule mockup</title>
+<title>Refill — Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F6F6F8; --card:#FFFFFF; --ink:#0B0B0F; --muted:#6B6B76; --line:#ECECEF;
-    --indigo:#5B5BD6; --indigo-soft:#EEEEFC; --green:#16A34A; --green-soft:#E9F7EF;
-    --amber:#B45309; --amber-soft:#FBF1E4; --grey-soft:#F1F1F3;
-    --radius:16px; --shadow:0 1px 2px rgba(11,11,15,.04),0 8px 24px rgba(11,11,15,.04);
+    --paper:#FAF8F3; --card:#FFFFFF; --ink:#181610; --ink2:#3B382F; --muted:#86827A;
+    --line:#EBE7DE; --line2:#F2EFE8;
+    --green:#0F6B43; --green2:#15885A; --green-soft:#E8F1EA; --mint:#CDE7D6;
+    --red:#A93426; --red-soft:#F6E7E3; --amber:#B07A12; --amber-soft:#F6EED9;
+    --r:18px; --shadow:0 1px 2px rgba(24,22,16,.04),0 10px 30px rgba(24,22,16,.05);
+    --serif:"Fraunces",Georgia,serif; --sans:"Inter Tight",-apple-system,"Segoe UI",sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1100px;margin:0 auto;padding:22px 26px 30px;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  .num{font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1120px;margin:0 auto;padding:26px 32px 38px;}
 
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-  .brand{display:flex;align-items:center;gap:12px;}
-  .logo{font-size:23px;font-weight:800;letter-spacing:-.02em;} .logo b{color:var(--indigo);}
-  .sub{color:var(--muted);font-size:13px;border-left:1px solid var(--line);padding-left:12px;}
-  .live{display:flex;align-items:center;gap:7px;background:var(--green-soft);color:var(--green);
-    font-weight:600;font-size:12.5px;padding:7px 12px;border-radius:999px;}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  .mark{width:30px;height:30px;border-radius:9px;background:var(--green);position:relative;}
+  .mark::after{content:"";position:absolute;inset:9px 0 0 9px;width:12px;height:12px;border-radius:50%;
+    border:2.5px solid #fff;border-right-color:transparent;transform:rotate(35deg);}
+  .wordmark{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:-.01em;}
+  .topright{display:flex;align-items:center;gap:12px;}
+  .seg{display:flex;background:#F0ECE3;border:1px solid var(--line);border-radius:11px;padding:4px;gap:3px;}
+  .seg div{padding:7px 15px;font-size:13px;font-weight:550;color:var(--muted);border-radius:8px;}
+  .seg .on{background:#fff;color:var(--ink);box-shadow:var(--shadow);}
+  .live{display:flex;align-items:center;gap:7px;background:var(--green-soft);color:var(--green);font-weight:600;font-size:12.5px;padding:8px 13px;border-radius:999px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green2);box-shadow:0 0 0 3px rgba(21,136,90,.18);}
+  .avatar{width:34px;height:34px;border-radius:50%;background:#1F1C16;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
 
-  /* tabs */
-  .tabs{display:flex;gap:6px;background:var(--grey-soft);padding:5px;border-radius:12px;width:max-content;margin-bottom:18px;}
-  .tab{padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;}
+  .tabsrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .tabs{display:flex;gap:4px;background:#F0ECE3;border:1px solid var(--line);border-radius:11px;padding:4px;}
+  .tab{padding:8px 18px;border-radius:8px;font-size:13.5px;font-weight:550;color:var(--muted);}
   .tab.on{background:#fff;color:var(--ink);box-shadow:var(--shadow);}
 
-  /* date + summary */
-  .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-  .date{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;}
-  .nav{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--muted);
-    font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .toolbar{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;}
+  .date{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.01em;display:flex;align-items:center;gap:12px;}
+  .nav{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);}
   .chips{display:flex;gap:8px;}
-  .schip{font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted);}
-  .schip b{color:var(--ink);}
-  .schip.g{background:var(--green-soft);border-color:#CFEBD9;color:var(--green);}
+  .schip{font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted);}
+  .schip b{color:var(--ink);} .schip.i{border-color:var(--mint);color:var(--green);} .schip.i b{color:var(--green);}
+  .schip.g{background:var(--green-soft);border-color:var(--mint);color:var(--green);} .schip.g b{color:var(--green);}
 
-  /* table */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
   table{width:100%;border-collapse:collapse;}
-  thead th{text-align:left;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
-    color:var(--muted);padding:14px 18px;border-bottom:1px solid var(--line);background:#FCFCFD;}
-  tbody td{padding:15px 18px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle;}
+  thead th{text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:15px 20px;border-bottom:1px solid var(--line);background:#FCFBF7;}
+  tbody td{padding:16px 20px;border-bottom:1px solid var(--line2);font-size:13.5px;vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
   .time{font-weight:700;font-variant-numeric:tabular-nums;}
-  .who{font-weight:600;}
-  .treat{color:#3a3a42;}
-  .doc{color:var(--muted);font-size:12.5px;}
-  .val{font-weight:700;font-variant-numeric:tabular-nums;}
+  .who{font-weight:600;} .treat{color:var(--ink2);} .doc{color:var(--muted);font-size:12.5px;} .val{font-weight:700;font-variant-numeric:tabular-nums;}
+  .recby{color:var(--muted);font-size:12px;font-weight:500;}
 
-  .st{font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;}
-  .st-booked{background:var(--grey-soft);color:#44444C;}
-  .st-fill{background:var(--indigo-soft);color:var(--indigo);}
-  .st-rec{background:var(--green-soft);color:var(--green);}
-  .pulse{width:7px;height:7px;border-radius:50%;background:var(--indigo);}
+  .st{font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;}
+  .st-booked{background:#F1EDE4;color:#5b574d;}
+  .st-fill{background:var(--green-soft);color:var(--green);}
+  .st-rec{background:var(--green);color:#fff;}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--green2);}
 
   .act{text-align:right;}
-  .cancel{background:#fff;border:1px solid var(--line);color:#B91C1C;border-radius:9px;
-    padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
-  .cancel:hover{background:#FDF1F1;border-color:#F2C9C9;}
-  .link{color:var(--indigo);font-size:12.5px;font-weight:600;text-decoration:none;}
-  .target td{background:#FBFBFF;}
-  .hint{font-size:11px;color:var(--indigo);font-weight:700;margin-left:8px;}
-  .recby{color:var(--muted);font-size:12px;font-weight:500;}
+  .cancel{background:#fff;border:1px solid var(--line);color:var(--red);border-radius:10px;padding:8px 15px;font-size:12.5px;font-weight:600;font-family:var(--sans);}
+  .link{color:var(--green);font-size:12.5px;font-weight:600;text-decoration:none;}
+  .target td{background:#F8FBF8;}
+  .hint{font-size:11px;color:var(--green);font-weight:700;margin-left:9px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header>
-    <div class="brand">
-      <div class="logo">Re<b>fill</b></div>
-      <div class="sub">Vienna Smile Dental — reception cockpit</div>
+  <div class="top">
+    <div class="brand"><div class="mark"></div><div class="wordmark">Refill</div></div>
+    <div class="topright">
+      <div class="seg"><div class="on">Reception</div><div>Owner</div></div>
+      <div class="live"><span class="dot"></span> Live</div>
+      <div class="avatar">AD</div>
     </div>
-    <div class="live"><span class="dot"></span> Live</div>
-  </header>
+  </div>
 
-  <div class="tabs">
-    <div class="tab on">Schedule</div>
-    <div class="tab">Recovery</div>
+  <div class="tabsrow">
+    <div class="tabs"><div class="tab on">Schedule</div><div class="tab">Recovery</div></div>
   </div>
 
   <div class="toolbar">
-    <div class="date"><div class="nav">‹</div> Today · Sat, 6 Jun 2026 <div class="nav">›</div></div>
+    <div class="date"><div class="nav">‹</div> Today · Sat, 6 Jun <div class="nav">›</div></div>
     <div class="chips">
       <span class="schip"><b>7</b> appointments</span>
-      <span class="schip" style="color:var(--indigo);border-color:#D9D9F7"><b style="color:var(--indigo)">1</b> filling</span>
+      <span class="schip i"><b>1</b> filling</span>
       <span class="schip g"><b>1</b> recovered · €90</span>
     </div>
   </div>
 
-  <div class="card">
+  <div class="panel">
     <table>
       <thead>
         <tr><th>Time</th><th>Patient</th><th>Treatment</th><th>Practitioner</th><th>Value</th><th>Status</th><th class="act">Action</th></tr>
       </thead>
       <tbody>
+        <tr><td class="time">09:00</td><td class="who">Anna Keller</td><td class="treat">Hygiene</td><td class="doc">Dr. Moser</td><td class="val">€90</td><td><span class="st st-booked">Booked</span></td><td class="act"><button class="cancel">Cancel</button></td></tr>
+        <tr><td class="time">09:30</td><td class="who">Felix Wagner</td><td class="treat">Crown fitting</td><td class="doc">Dr. Berger</td><td class="val">€350</td><td><span class="st st-booked">Booked</span></td><td class="act"><button class="cancel">Cancel</button></td></tr>
+        <tr><td class="time">10:30</td><td class="who">Nina Fischer</td><td class="treat">Root canal</td><td class="doc">Dr. Eder</td><td class="val">€300</td><td><span class="st st-booked">Booked</span></td><td class="act"><button class="cancel">Cancel</button></td></tr>
         <tr>
-          <td class="time">09:00</td><td class="who">Anna Keller</td><td class="treat">Hygiene</td>
-          <td class="doc">Dr. Moser</td><td class="val">€90</td>
-          <td><span class="st st-booked">Booked</span></td>
-          <td class="act"><button class="cancel">Cancel</button></td>
+          <td class="time">11:30</td><td class="who">Lukas Bauer <span class="recby">· via Refill</span></td><td class="treat">Hygiene</td><td class="doc">Dr. Moser</td><td class="val">€90</td>
+          <td><span class="st st-rec">✓ Recovered</span></td><td class="act"><span class="recby">filled 13:54</span></td>
         </tr>
         <tr>
-          <td class="time">09:30</td><td class="who">Felix Wagner</td><td class="treat">Crown fitting</td>
-          <td class="doc">Dr. Berger</td><td class="val">€350</td>
-          <td><span class="st st-booked">Booked</span></td>
-          <td class="act"><button class="cancel">Cancel</button></td>
+          <td class="time">14:00</td><td class="who">— <span class="recby">cancelled by patient</span></td><td class="treat">Ortho adjustment</td><td class="doc">Dr. Berger</td><td class="val">€120</td>
+          <td><span class="st st-fill"><span class="pulse"></span> Filling…</span></td><td class="act"><a class="link" href="#">View in Recovery →</a></td>
         </tr>
-        <tr>
-          <td class="time">10:30</td><td class="who">Nina Fischer</td><td class="treat">Root canal</td>
-          <td class="doc">Dr. Eder</td><td class="val">€300</td>
-          <td><span class="st st-booked">Booked</span></td>
-          <td class="act"><button class="cancel">Cancel</button></td>
-        </tr>
-        <tr>
-          <td class="time">11:30</td>
-          <td class="who">Lukas Bauer <span class="recby">· via Refill</span></td>
-          <td class="treat">Hygiene</td><td class="doc">Dr. Moser</td><td class="val">€90</td>
-          <td><span class="st st-rec">✓ Recovered</span></td>
-          <td class="act"><span class="recby">filled 13:54</span></td>
-        </tr>
-        <tr>
-          <td class="time">14:00</td>
-          <td class="who">— <span class="recby">cancelled by patient</span></td>
-          <td class="treat">Ortho adjustment</td><td class="doc">Dr. Berger</td><td class="val">€120</td>
-          <td><span class="st st-fill"><span class="pulse"></span> Filling…</span></td>
-          <td class="act"><a class="link" href="#">View in Recovery →</a></td>
-        </tr>
-        <tr>
-          <td class="time">15:30</td><td class="who">David Fuchs</td><td class="treat">Crown fitting</td>
-          <td class="doc">Dr. Eder</td><td class="val">€350</td>
-          <td><span class="st st-booked">Booked</span></td>
-          <td class="act"><button class="cancel">Cancel</button></td>
-        </tr>
+        <tr><td class="time">15:30</td><td class="who">David Fuchs</td><td class="treat">Crown fitting</td><td class="doc">Dr. Eder</td><td class="val">€350</td><td><span class="st st-booked">Booked</span></td><td class="act"><button class="cancel">Cancel</button></td></tr>
         <tr class="target">
-          <td class="time">17:30</td><td class="who">Maria Schmid</td>
-          <td class="treat">Implant consultation</td><td class="doc">Dr. Berger</td><td class="val">€450</td>
-          <td><span class="st st-booked">Booked</span></td>
-          <td class="act"><button class="cancel">Cancel</button><span class="hint">demo →</span></td>
+          <td class="time">17:30</td><td class="who">Maria Schmid</td><td class="treat">Implant consultation</td><td class="doc">Dr. Berger</td><td class="val">€450</td>
+          <td><span class="st st-booked">Booked</span></td><td class="act"><button class="cancel">Cancel</button><span class="hint">demo →</span></td>
         </tr>
       </tbody>
     </table>
