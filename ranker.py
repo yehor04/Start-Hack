@@ -9,12 +9,14 @@ Usage:
 import json
 import argparse
 from datetime import date
+from doctor_matching import doctor_match_score
 
 # ── Tune these freely ──────────────────────────────────────────────────────────
 WEIGHTS = {
-    "urgency":          0.35,
-    "time_match":       0.20,
-    "days_on_waitlist": 0.20,
+    "urgency":          0.30,
+    "time_match":       0.15,
+    "days_on_waitlist": 0.15,
+    "doctor_match":     0.20,  # replaces hard filter — soft compatibility score
     "contact_attempts": 0.10,  # penalty — subtracted
     "contact_result":   0.10,  # penalty — subtracted
     "times_skipped":    0.05,  # penalty — subtracted
@@ -43,6 +45,10 @@ def hard_filter(patients: list, slot: dict) -> tuple:
     slot_date = date.fromisoformat(slot["date"])
 
     for p in patients:
+        if not p.get("consent", False):
+            rejected.append({**p, "filter_reason": "no outbound call consent"})
+            continue
+
         assigned = date.fromisoformat(p["assigned_date"])
         if assigned > slot_date:
             rejected.append({
@@ -59,11 +65,6 @@ def hard_filter(patients: list, slot: dict) -> tuple:
                     f"procedure too long "
                     f"({p['procedure_time_min']} min > {slot['duration_min']} min)"
                 ),
-            })
-        elif p["assigned_doctor"] != slot["doctor"]:
-            rejected.append({
-                **p,
-                "filter_reason": f"wrong doctor ({p['assigned_doctor']})",
             })
         else:
             eligible.append(p)
@@ -104,7 +105,7 @@ def _normalize(value: float, pool: list, penalty: bool = False) -> float:
     return (value - lo) / (hi - lo)
 
 
-def score_candidates(candidates: list, slot: dict) -> list:
+def score_candidates(candidates: list, slot: dict, doctors: list = None, doctor_method: str = "bm25") -> list:
     """Score and rank candidates for a specific slot. Returns sorted list."""
     if not candidates:
         return []
@@ -120,6 +121,7 @@ def score_candidates(candidates: list, slot: dict) -> list:
         urgency      = URGENCY_SCORE.get(p["urgency"], 0.0)
         time_match   = _time_match(p["time_preference"], p["preferred_time"], slot["time"])
         days_norm    = _normalize(p["days_on_waitlist"], days_pool)
+        doc_match    = doctor_match_score(p["condition"], slot["doctor"], doctors, doctor_method) if doctors else 0.0
         attempt_pen  = _normalize(p["contact_attempts"], attempts_pool, penalty=True)
         result_pen   = CONTACT_RESULT_PENALTY.get(p["last_contact_result"], 0.2)
         skipped_pen  = _normalize(p["times_skipped"],    skipped_pool,  penalty=True)
@@ -128,7 +130,8 @@ def score_candidates(candidates: list, slot: dict) -> list:
         score = (
             WEIGHTS["urgency"]          *  urgency     +
             WEIGHTS["time_match"]       *  time_match  +
-            WEIGHTS["days_on_waitlist"] *  days_norm   -
+            WEIGHTS["days_on_waitlist"] *  days_norm   +
+            WEIGHTS["doctor_match"]     *  doc_match   -
             WEIGHTS["contact_attempts"] *  attempt_pen -
             WEIGHTS["contact_result"]   *  result_pen  -
             WEIGHTS["times_skipped"]    *  skipped_pen +
@@ -139,9 +142,10 @@ def score_candidates(candidates: list, slot: dict) -> list:
             **p,
             "final_score": round(max(0.0, score), 4),
             "breakdown": {
-                "urgency":           round( urgency,     3),
-                "time_match":        round( time_match,  3),
-                "days_on_waitlist":  round( days_norm,   3),
+                "urgency":           round( urgency,    3),
+                "time_match":        round( time_match, 3),
+                "days_on_waitlist":  round( days_norm,  3),
+                "doctor_match":      round( doc_match,  3),
                 "contact_attempts":  round(-attempt_pen, 3),
                 "contact_result":    round(-result_pen,  3),
                 "times_skipped":     round(-skipped_pen, 3),
@@ -152,12 +156,13 @@ def score_candidates(candidates: list, slot: dict) -> list:
     return sorted(scored, key=lambda x: x["final_score"], reverse=True)
 
 
-def rank(patients: list, slot: dict) -> dict:
+def rank(patients: list, slot: dict, doctors: list = None, doctor_method: str = "bm25") -> dict:
     """Full pipeline: filter → score → rank. Returns structured result."""
     eligible, rejected = hard_filter(patients, slot)
-    ranked = score_candidates(eligible, slot)
+    ranked = score_candidates(eligible, slot, doctors=doctors, doctor_method=doctor_method)
     return {
         "slot": slot,
+        "doctor_method": doctor_method,
         "total_on_waitlist": len(patients),
         "filtered_out": len(rejected),
         "candidates": len(eligible),
