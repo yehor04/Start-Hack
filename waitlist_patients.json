@@ -14,7 +14,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 1,
     "procedure_cost": 350,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P002",
@@ -31,7 +32,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 550,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P003",
@@ -48,7 +50,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 2,
     "procedure_cost": 280,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P004",
@@ -65,7 +68,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 300,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P005",
@@ -82,7 +86,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 200,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P006",
@@ -99,7 +104,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 0,
     "procedure_cost": 320,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P007",
@@ -116,7 +122,8 @@
     "last_contact_result": "none",
     "times_skipped": 1,
     "procedure_cost": 750,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P008",
@@ -133,7 +140,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 400,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P009",
@@ -150,7 +158,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 180,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P010",
@@ -167,7 +176,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 0,
     "procedure_cost": 250,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P011",
@@ -184,7 +194,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 350,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P012",
@@ -201,7 +212,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 0,
     "procedure_cost": 380,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P013",
@@ -218,7 +230,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 500,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P014",
@@ -235,7 +248,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 2,
     "procedure_cost": 280,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P015",
@@ -252,7 +266,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 600,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P016",
@@ -269,7 +284,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 200,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P017",
@@ -286,7 +302,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 620,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P018",
@@ -303,7 +320,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 1,
     "procedure_cost": 950,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P019",
@@ -320,7 +338,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 380,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P020",
@@ -337,7 +356,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 280,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P021",
@@ -354,7 +374,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 3,
     "procedure_cost": 1500,
-    "procedure_time_min": 120
+    "procedure_time_min": 120,
+    "phone": "+436765739553"
   },
   {
     "id": "P022",
@@ -371,7 +392,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 420,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P023",
@@ -388,7 +410,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 0,
     "procedure_cost": 780,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P024",
@@ -405,7 +428,8 @@
     "last_contact_result": "none",
     "times_skipped": 2,
     "procedure_cost": 900,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P025",
@@ -422,7 +446,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 650,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P026",
@@ -439,7 +464,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 1,
     "procedure_cost": 1800,
-    "procedure_time_min": 120
+    "procedure_time_min": 120,
+    "phone": "+436765739553"
   },
   {
     "id": "P027",
@@ -456,7 +482,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 580,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P028",
@@ -473,7 +500,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 450,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P029",
@@ -490,7 +518,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 600,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P030",
@@ -507,7 +536,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 0,
     "procedure_cost": 180,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P031",
@@ -524,7 +554,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 640,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P032",
@@ -541,7 +572,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 4,
     "procedure_cost": 120,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P033",
@@ -558,7 +590,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 80,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P034",
@@ -575,7 +608,8 @@
     "last_contact_result": "none",
     "times_skipped": 1,
     "procedure_cost": 880,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P035",
@@ -592,7 +626,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 0,
     "procedure_cost": 160,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P036",
@@ -609,7 +644,8 @@
     "last_contact_result": "none",
     "times_skipped": 5,
     "procedure_cost": 700,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P037",
@@ -626,7 +662,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 560,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P038",
@@ -643,7 +680,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 0,
     "procedure_cost": 760,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P039",
@@ -660,7 +698,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 720,
-    "procedure_time_min": 75
+    "procedure_time_min": 75,
+    "phone": "+436765739553"
   },
   {
     "id": "P040",
@@ -677,7 +716,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 1100,
-    "procedure_time_min": 120
+    "procedure_time_min": 120,
+    "phone": "+436765739553"
   },
   {
     "id": "P041",
@@ -694,7 +734,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P042",
@@ -711,7 +752,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 80,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P043",
@@ -728,7 +770,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 320,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P044",
@@ -745,7 +788,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 190,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P045",
@@ -762,7 +806,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 75,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P046",
@@ -779,7 +824,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 120,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P047",
@@ -796,7 +842,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 2,
     "procedure_cost": 70,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P048",
@@ -813,7 +860,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 170,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P049",
@@ -830,7 +878,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 75,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P050",
@@ -847,7 +896,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 3,
     "procedure_cost": 90,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P051",
@@ -864,7 +914,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 65,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P052",
@@ -881,7 +932,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P053",
@@ -898,7 +950,8 @@
     "last_contact_result": "no_answer",
     "times_skipped": 0,
     "procedure_cost": 90,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P054",
@@ -915,7 +968,8 @@
     "last_contact_result": "none",
     "times_skipped": 1,
     "procedure_cost": 100,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P055",
@@ -932,7 +986,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P056",
@@ -949,7 +1004,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 0,
     "procedure_cost": 200,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P057",
@@ -966,7 +1022,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P058",
@@ -983,7 +1040,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 50,
-    "procedure_time_min": 20
+    "procedure_time_min": 20,
+    "phone": "+436765739553"
   },
   {
     "id": "P059",
@@ -1000,7 +1058,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 60,
-    "procedure_time_min": 20
+    "procedure_time_min": 20,
+    "phone": "+436765739553"
   },
   {
     "id": "P060",
@@ -1017,7 +1076,8 @@
     "last_contact_result": "none",
     "times_skipped": 6,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P061",
@@ -1034,7 +1094,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 70,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P062",
@@ -1051,7 +1112,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 0,
     "procedure_cost": 180,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P063",
@@ -1068,7 +1130,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 130,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P064",
@@ -1085,7 +1148,8 @@
     "last_contact_result": "none",
     "times_skipped": 2,
     "procedure_cost": 120,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P065",
@@ -1102,7 +1166,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P066",
@@ -1119,7 +1184,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 70,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P067",
@@ -1136,7 +1202,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 75,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P068",
@@ -1153,7 +1220,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 1,
     "procedure_cost": 90,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P069",
@@ -1170,7 +1238,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P070",
@@ -1187,7 +1256,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 150,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P071",
@@ -1204,7 +1274,8 @@
     "last_contact_result": "none",
     "times_skipped": 4,
     "procedure_cost": 320,
-    "procedure_time_min": 90
+    "procedure_time_min": 90,
+    "phone": "+436765739553"
   },
   {
     "id": "P072",
@@ -1221,7 +1292,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 90,
-    "procedure_time_min": 20
+    "procedure_time_min": 20,
+    "phone": "+436765739553"
   },
   {
     "id": "P073",
@@ -1238,7 +1310,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 175,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P074",
@@ -1255,7 +1328,8 @@
     "last_contact_result": "voicemail",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P075",
@@ -1272,7 +1346,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 350,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P076",
@@ -1289,7 +1364,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 70,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P077",
@@ -1306,7 +1382,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 110,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   },
   {
     "id": "P078",
@@ -1323,7 +1400,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 130,
-    "procedure_time_min": 30
+    "procedure_time_min": 30,
+    "phone": "+436765739553"
   },
   {
     "id": "P079",
@@ -1340,7 +1418,8 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 180,
-    "procedure_time_min": 45
+    "procedure_time_min": 45,
+    "phone": "+436765739553"
   },
   {
     "id": "P080",
@@ -1357,6 +1436,7 @@
     "last_contact_result": "none",
     "times_skipped": 0,
     "procedure_cost": 150,
-    "procedure_time_min": 60
+    "procedure_time_min": 60,
+    "phone": "+436765739553"
   }
 ]
