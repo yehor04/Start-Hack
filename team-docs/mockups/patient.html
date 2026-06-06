@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Refill — Your appointment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1EC; --card:#FFFFFF; --ink:#16201B; --ink2:#3C4742; --muted:#7C8A83;
+    --line:#E7EBE5; --green:#136B4E; --green2:#1C8A66; --green-soft:#E6F1EB; --mint:#D6EADD;
+    --red:#A8392B; --r:24px;
+    --sans:"Manrope",-apple-system,"Segoe UI",sans-serif; --serif:"Fraunces",Georgia,serif;
+    --shadow:0 2px 6px rgba(20,32,27,.05),0 18px 40px rgba(20,32,27,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(120% 60% at 50% -10%, #E2EDE6 0%, var(--bg) 55%);
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+    min-height:100vh;}
+  .phone{max-width:430px;margin:0 auto;padding:24px 20px 30px;}
+
+  /* clinic header */
+  .clinic{display:flex;align-items:center;gap:11px;margin:6px 2px 22px;}
+  .badge{width:38px;height:38px;border-radius:11px;background:var(--green);display:flex;align-items:center;justify-content:center;}
+  .clinic .nm{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:-.01em;line-height:1.1;}
+  .clinic .sub{font-size:12px;color:var(--muted);margin-top:1px;}
+
+  .hi{font-size:14px;color:var(--muted);margin:0 2px 4px;}
+  .lead{font-family:var(--serif);font-weight:500;font-size:25px;letter-spacing:-.01em;margin:0 2px 18px;line-height:1.18;}
+
+  /* appointment card */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
+  .cardtop{display:flex;gap:16px;padding:20px 20px 18px;}
+  .cal{flex:0 0 64px;width:64px;border-radius:15px;border:1px solid var(--line);overflow:hidden;text-align:center;}
+  .cal .m{background:var(--green);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;padding:5px 0;}
+  .cal .d{font-family:var(--serif);font-size:26px;font-weight:600;padding:7px 0 8px;}
+  .cardtop .info{flex:1;}
+  .pill{display:inline-block;font-size:11.5px;font-weight:700;color:var(--green);background:var(--green-soft);
+    padding:4px 10px;border-radius:999px;letter-spacing:.02em;}
+  .treat{font-size:18px;font-weight:700;margin:9px 0 3px;letter-spacing:-.01em;}
+  .when{font-size:13.5px;color:var(--ink2);font-weight:500;}
+
+  .rows{border-top:1px solid var(--line);}
+  .row{display:flex;align-items:center;gap:13px;padding:14px 20px;border-bottom:1px solid var(--line);}
+  .row:last-child{border-bottom:none;}
+  .ic{flex:0 0 20px;color:var(--green);}
+  .row .k{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+  .row .v{font-size:13.5px;font-weight:600;color:var(--ink);margin-top:1px;}
+
+  /* actions */
+  .actions{margin-top:18px;display:flex;flex-direction:column;gap:11px;}
+  .btn{display:flex;align-items:center;justify-content:center;gap:9px;border-radius:15px;
+    padding:16px;font-size:15px;font-weight:700;cursor:pointer;border:1px solid transparent;}
+  .btn.primary{background:var(--green);color:#fff;box-shadow:0 8px 18px rgba(19,107,78,.22);}
+  .btn.ghost{background:#fff;border-color:var(--line);color:var(--ink);}
+  .btn.danger{background:#fff;border-color:#EAD7D3;color:var(--red);font-weight:600;}
+
+  /* consent / earlier-slot card */
+  .nudge{margin-top:18px;background:var(--green-soft);border:1px solid var(--mint);border-radius:18px;
+    padding:16px 17px;display:flex;align-items:flex-start;gap:13px;}
+  .nudge .t{font-size:13.5px;font-weight:700;color:var(--green);}
+  .nudge .d{font-size:12.5px;color:#3a5249;margin-top:3px;line-height:1.5;}
+  .switch{flex:0 0 44px;width:44px;height:26px;border-radius:999px;background:var(--green);position:relative;margin-top:2px;}
+  .switch::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;}
+
+  .foot{text-align:center;margin-top:26px;}
+  .foot a{font-size:12.5px;color:var(--muted);text-decoration:none;font-weight:600;margin:0 9px;}
+  .powered{margin-top:16px;font-size:11px;color:#9AA69F;letter-spacing:.02em;}
+  .powered b{color:#5e6d65;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="clinic">
+    <div class="badge">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>
+    </div>
+    <div>
+      <div class="nm">Vienna Smile Dental</div>
+      <div class="sub">Appointment management</div>
+    </div>
+  </div>
+
+  <p class="hi">Hello Maria,</p>
+  <h1 class="lead">Here’s your upcoming appointment.</h1>
+
+  <div class="card">
+    <div class="cardtop">
+      <div class="cal"><div class="m">JUN</div><div class="d">11</div></div>
+      <div class="info">
+        <span class="pill">Confirmed</span>
+        <div class="treat">Implant consultation</div>
+        <div class="when">Thursday · 17:30 – 18:00</div>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+        <div><div class="k">Practitioner</div><div class="v">Dr. Berger</div></div>
+      </div>
+      <div class="row">
+        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg></span>
+        <div><div class="k">Location</div><div class="v">Room OP 1 · Mariahilfer Str. 12, Wien</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary">Reschedule appointment</button>
+    <button class="btn danger">Cancel appointment</button>
+  </div>
+
+  <div class="nudge">
+    <div>
+      <div class="t">Want to be seen sooner?</div>
+      <div class="d">If an earlier slot opens up, we’ll call you to offer it. You can opt out any time.</div>
+    </div>
+    <div class="switch" title="on"></div>
+  </div>
+
+  <div class="foot">
+    <a href="#">Add to calendar</a><a href="#">Contact clinic</a>
+    <div class="powered">Powered by <b>Refill</b></div>
+  </div>
+
+</div>
+</body>
+</html>

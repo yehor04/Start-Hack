@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Refill — Owner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF8F3; --card:#FFFFFF; --ink:#181610; --ink2:#3B382F; --muted:#86827A;
+    --line:#EBE7DE; --line2:#F2EFE8;
+    --green:#0F6B43; --green2:#15885A; --green-soft:#E8F1EA; --mint:#CDE7D6;
+    --clay:#B4532A; --red:#A93426; --amber:#B07A12;
+    --r:18px; --shadow:0 1px 2px rgba(24,22,16,.04),0 10px 30px rgba(24,22,16,.05);
+    --serif:"Fraunces",Georgia,serif; --sans:"Inter Tight",-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;font-feature-settings:"ss01","cv01";}
+  .num{font-variant-numeric:tabular-nums;}
+  .wrap{max-width:1240px;margin:0 auto;padding:26px 32px 40px;}
+
+  /* top bar */
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  .mark{width:30px;height:30px;border-radius:9px;background:var(--green);position:relative;}
+  .mark::after{content:"";position:absolute;inset:9px 0 0 9px;width:12px;height:12px;border-radius:50%;
+    border:2.5px solid #fff;border-right-color:transparent;transform:rotate(35deg);}
+  .wordmark{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:-.01em;}
+  .seg{display:flex;background:#F0ECE3;border:1px solid var(--line);border-radius:11px;padding:4px;gap:3px;}
+  .seg div{padding:7px 16px;font-size:13px;font-weight:550;color:var(--muted);border-radius:8px;}
+  .seg .on{background:#fff;color:var(--ink);box-shadow:var(--shadow);}
+  .topright{display:flex;align-items:center;gap:14px;}
+  .range{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:550;color:var(--ink2);
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 14px;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:#1F1C16;color:#fff;display:flex;
+    align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:end;
+    padding:6px 4px 30px;border-bottom:1px solid var(--line);margin-bottom:26px;}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--green);}
+  .hero h1{font-family:var(--serif);font-weight:500;font-size:72px;line-height:.98;letter-spacing:-.02em;
+    margin:14px 0 12px;}
+  .hero .sub{font-size:14.5px;color:var(--muted);}
+  .hero .sub b{color:var(--green);font-weight:600;}
+  .sparkwrap{align-self:end;}
+  .sparkcap{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px;}
+
+  /* kpi cards */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px;box-shadow:var(--shadow);}
+  .kpi .lab{font-size:12.5px;color:var(--muted);font-weight:550;}
+  .kpi .v{font-family:var(--serif);font-size:34px;font-weight:500;letter-spacing:-.01em;margin-top:10px;}
+  .kpi .d{font-size:12px;font-weight:600;margin-top:7px;display:flex;align-items:center;gap:5px;}
+  .pos{color:var(--green2);} .neg{color:var(--clay);}
+  .kpi.donut{display:flex;align-items:center;gap:16px;}
+  .ring{width:62px;height:62px;border-radius:50%;flex:0 0 62px;
+    background:conic-gradient(var(--green) 0 71%, #ECE7DD 71% 100%);display:flex;align-items:center;justify-content:center;}
+  .ring::before{content:"";position:absolute;}
+  .ring i{width:46px;height:46px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:700;font-family:var(--sans);}
+
+  /* main grid */
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);}
+  .ph{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 4px;}
+  .ph h3{margin:0;font-size:15px;font-weight:600;}
+  .ph .mt{font-size:12.5px;color:var(--muted);}
+  .pb{padding:16px 20px 22px;}
+
+  .legend{display:flex;gap:18px;font-size:12px;color:var(--muted);margin-top:14px;}
+  .legend i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:middle;}
+
+  /* outcomes list */
+  .out{display:flex;flex-direction:column;gap:15px;margin-top:6px;}
+  .orow{display:grid;grid-template-columns:120px 1fr 44px;align-items:center;gap:12px;}
+  .orow .nm{font-size:13px;color:var(--ink2);font-weight:500;}
+  .otrack{height:9px;border-radius:5px;background:#F1EDE4;overflow:hidden;}
+  .otrack i{display:block;height:100%;border-radius:5px;}
+  .orow .pct{font-size:13px;font-weight:600;text-align:right;}
+
+  /* vs manual */
+  .vs{margin-top:22px;padding-top:20px;border-top:1px solid var(--line2);}
+  .vs .t{font-size:12.5px;color:var(--muted);font-weight:550;margin-bottom:12px;}
+  .vsrow{display:flex;align-items:center;gap:12px;margin-top:10px;}
+  .vsrow .nm{flex:0 0 78px;font-size:13px;font-weight:550;}
+  .vsrow .track{flex:1;height:26px;border-radius:8px;background:#F1EDE4;position:relative;overflow:hidden;}
+  .vsrow .track i{display:block;height:100%;border-radius:8px;}
+  .vsrow .track span{position:absolute;right:10px;top:4px;font-size:12.5px;font-weight:700;color:#fff;}
+  .note{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand"><div class="mark"></div><div class="wordmark">Refill</div></div>
+    <div class="topright">
+      <div class="seg"><div>Reception</div><div class="on">Owner</div></div>
+      <div class="range">This week
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86827A" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="avatar">DK</div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Revenue recovered</div>
+      <h1 class="num">€12,480</h1>
+      <div class="sub">this week · <b>+€4,210</b> vs last week · 38 slots saved that would have gone empty</div>
+    </div>
+    <div class="sparkwrap">
+      <div class="sparkcap"><span>Mon</span><span>Sun</span></div>
+      <svg width="100%" height="92" viewBox="0 0 520 92" preserveAspectRatio="none">
+        <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#15885A" stop-opacity="0.18"/><stop offset="1" stop-color="#15885A" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path d="M0,70 L74,60 L148,64 L222,44 L296,50 L370,30 L444,34 L520,14 L520,92 L0,92 Z" fill="url(#g)"/>
+        <path d="M0,70 L74,60 L148,64 L222,44 L296,50 L370,30 L444,34 L520,14" fill="none" stroke="#0F6B43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="520" cy="14" r="4" fill="#0F6B43"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi donut">
+      <div class="ring" style="position:relative"><i>71%</i></div>
+      <div><div class="lab">Refill rate</div><div class="d pos">▲ 12 pts vs manual baseline</div></div>
+    </div>
+    <div class="kpi"><div class="lab">Slots recovered</div><div class="v num">38</div><div class="d pos">▲ 9 vs last week</div></div>
+    <div class="kpi"><div class="lab">Avg time-to-fill</div><div class="v num">1m 52s</div><div class="d pos">▲ vs ~14 min by hand</div></div>
+    <div class="kpi"><div class="lab">Calls per fill</div><div class="v num">1.7</div><div class="d" style="color:var(--muted)">efficient outreach</div></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="grid">
+
+    <div class="panel">
+      <div class="ph"><h3>Recovered revenue</h3><div class="mt">daily · this week</div></div>
+      <div class="pb">
+        <svg width="100%" height="230" viewBox="0 0 680 230">
+          <!-- gridlines -->
+          <g stroke="#F2EFE8" stroke-width="1">
+            <line x1="0" y1="20" x2="680" y2="20"/><line x1="0" y1="70" x2="680" y2="70"/>
+            <line x1="0" y1="120" x2="680" y2="120"/><line x1="0" y1="170" x2="680" y2="170"/>
+          </g>
+          <!-- bars -->
+          <g>
+            <rect x="24"  y="120" width="52" height="90"  rx="6" fill="#CDE7D6"/>
+            <rect x="118" y="104" width="52" height="106" rx="6" fill="#CDE7D6"/>
+            <rect x="212" y="132" width="52" height="78"  rx="6" fill="#CDE7D6"/>
+            <rect x="306" y="84"  width="52" height="126" rx="6" fill="#9FD4B5"/>
+            <rect x="400" y="98"  width="52" height="112" rx="6" fill="#CDE7D6"/>
+            <rect x="494" y="58"  width="52" height="152" rx="6" fill="#0F6B43"/>
+            <rect x="588" y="74"  width="52" height="136" rx="6" fill="#9FD4B5"/>
+          </g>
+          <g font-family="Inter Tight" font-size="12" fill="#86827A" text-anchor="middle">
+            <text x="50"  y="226">Mon</text><text x="144" y="226">Tue</text><text x="238" y="226">Wed</text>
+            <text x="332" y="226">Thu</text><text x="426" y="226">Fri</text><text x="520" y="226">Sat</text><text x="614" y="226">Sun</text>
+          </g>
+          <text x="520" y="48" font-family="Inter Tight" font-size="12.5" font-weight="700" fill="#0F6B43" text-anchor="middle">€2,840</text>
+        </svg>
+        <div class="legend"><span><i style="background:#0F6B43"></i>Best day</span><span><i style="background:#CDE7D6"></i>Daily recovered</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><h3>Call outcomes</h3><div class="mt">this week</div></div>
+      <div class="pb">
+        <div class="out">
+          <div class="orow"><span class="nm">Booked ✓</span><div class="otrack"><i style="width:71%;background:#0F6B43"></i></div><span class="pct">71%</span></div>
+          <div class="orow"><span class="nm">No answer</span><div class="otrack"><i style="width:14%;background:#D9B873"></i></div><span class="pct">14%</span></div>
+          <div class="orow"><span class="nm">Declined</span><div class="otrack"><i style="width:9%;background:#C98A6A"></i></div><span class="pct">9%</span></div>
+          <div class="orow"><span class="nm">Voicemail</span><div class="otrack"><i style="width:6%;background:#CBC6BA"></i></div><span class="pct">6%</span></div>
+        </div>
+
+        <div class="vs">
+          <div class="t">Refill vs manual dialing — slots filled</div>
+          <div class="vsrow"><div class="nm">Refill</div><div class="track"><i style="width:71%;background:#0F6B43"></i><span>71%</span></div></div>
+          <div class="vsrow"><div class="nm">Manual</div><div class="track"><i style="width:32%;background:#C9C3B6"></i><span style="color:#5a564c">32%</span></div></div>
+          <div class="note">Manual baseline modelled from 100 simulated cancellations — illustrates policy behaviour, not a production benchmark.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
