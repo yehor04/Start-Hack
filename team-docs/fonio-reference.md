@@ -121,10 +121,36 @@ Integrations** config. Until found, the assistant is testable via the in-app **T
 - **International restriction:** calling across countries can throw `outOfBounds` / "outbound not
   allowed" (e.g. +36 → +43). Use a number whose region matches the phones you'll call, or ask the
   team to **allow international**. Tell them which destination country your test phones are in.
-- **Minutes:** ~**750 outbound minutes** available on the account (the "2 credits" shown is just
-  telco cost; team will top up if blocked). Plenty for testing.
+- **Minutes:** ~**750 outbound minutes** available on the account. ⚠️ But note the separate
+  **2-credit cap** below — credits, not minutes, are the binding limit for testing.
 - **There IS a REST API to trigger outbound calls** (teams in the channel call it directly) — get
   the exact endpoint from More → Open Documentation. The CSV "Outbound Campaigns" is the batch
   tool, NOT what we want for event-driven single calls.
 - **Prompt tip (Marco):** in Lena's prompt add a pronunciation note — "read numbers as words
   (1 = one, 2 = two…), and read symbols/units in full" — fixes AI mis-reading digits, esp. non-EN.
+
+## ⚠️ Credit cap — conserve real calls (Discord, 2026-06-06)
+
+- There is a **hard 2-credit cap per account** (`x/2`). Marco was checking whether teams hit it
+  before asking the tech team to raise it across all 40 accounts (a manual hassle for them).
+- **A proper call costs ~0.3 credits** (Ersjan: 0.3 after one real call) → only **~6 real calls**
+  before the cap. Budget accordingly.
+- **Plan:** rehearse the whole loop in **simulation** (`FONIO_LIVE=false`) and spend real calls
+  only on (1) the one mandatory live-loop proof and (2) the backup video. **Record the backup
+  video the moment the first real call succeeds.**
+- **If you hit `x/2`:** ask **Marco in the public Discord thread** (he asked: no DMs) and state the
+  account (`Hack Start GmbH 14`) — the tech team will raise the limit. Only ask once actually
+  blocked.
+
+## Native scheduler does NOT expose calendar metadata → use our own booking (Discord, 2026-06-06)
+
+- Philipp confirmed: the **native fonio scheduler books into the linked Google Calendar**, but the
+  **calendar event metadata is NOT exposed** to us — you get a booking reference you can't link
+  back to the event (no event ID / start / duration). Marco: "the data isn't available in the
+  frontend, it only runs on the dev side."
+- **Implication for Refill:** this validates our design — we do **NOT** use the native scheduler.
+  We book into our **own Postgres DB** from the outcome webhook + Variable Extraction
+  (`handleOutcome` → slot `filled`), so we own all the metadata. **We do not need Google Calendar.**
+- **Fallback only if calendar sync is ever required:** Marco's workaround is fonio → **n8n** →
+  Google Calendar (reproduce the scheduler in n8n so you control the event metadata). Not needed
+  for our current architecture.
