@@ -42,3 +42,7 @@ glasses.md
 notarity-case.pdf
 robodog-case.pdf
 techbold-case.pdf
+
+# build cache
+*.tsbuildinfo
+next-env.d.ts
