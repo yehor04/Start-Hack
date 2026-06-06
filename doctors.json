@@ -1,0 +1,37 @@
+[
+  {
+    "id": "DR001",
+    "name": "Dr. Stefan Bauer",
+    "specialization": "Endodontist",
+    "description": "Dr. Bauer is an endodontist focused on the diagnosis and treatment of dental pulp and root canal conditions. He manages dental abscesses, acute pulpitis, and severe toothaches caused by pulp involvement. He performs root canal treatments on upper and lower molars, premolars, and incisors, including retreatment of previously failed root canals. He also handles cracked molars with acute pain, vertical root fractures, recurring dental abscesses, and combined root canal with crown preparation in a single visit. Referred to for any condition involving nerve pain, pulp inflammation, periapical infection, or endodontic emergency.",
+    "keywords": "dental abscess acute pulpitis root canal treatment root canal retreatment cracked molar severe toothache recurring dental abscess vertical root fracture root canal crown preparation pulp inflammation nerve pain periapical infection endodontic emergency toothache suspected pulp involvement upper molar lower premolar lower left first molar upper second premolar same-visit crown"
+  },
+  {
+    "id": "DR002",
+    "name": "Dr. Michael Gruber",
+    "specialization": "Oral Surgeon",
+    "description": "Dr. Gruber is an oral and maxillofacial surgeon handling all surgical interventions in the mouth and jaw. He extracts wisdom teeth including impacted and bilateral cases, treats pericoronitis and wisdom tooth infections, and manages post-extraction complications such as dry socket. He places and removes dental implants, treats peri-implantitis, and performs crown lengthening. He handles dental trauma including chipped incisors, acute dental infections with swelling, broken implant abutments, and vertical root fractures requiring extraction. He also provides implant planning consultations with 3D scans and monitors wisdom tooth development via OPG X-ray.",
+    "keywords": "dental trauma chipped incisor acute dental infection swelling post-extraction dry socket pericoronitis wisdom tooth infection broken implant abutment acute pericoronitis wisdom tooth extraction impacted wisdom tooth surgical extraction dental implant placement implant planning crown lengthening failed implant removal peri-implantitis bilateral wisdom tooth extraction wisdom tooth monitoring OPG X-ray gummy smile correction 3D scan oral surgery"
+  },
+  {
+    "id": "DR003",
+    "name": "Dr. Anna Wagner",
+    "specialization": "General Dentist & Cosmetic Dentistry",
+    "description": "Dr. Wagner is a general dentist with a focus on restorative and cosmetic procedures. She fits porcelain crowns, ceramic inlays, porcelain veneers, and prepares multi-unit bridges. She handles broken teeth from trauma, lost crowns with exposed nerves, and periodontitis flare-ups. She performs professional teeth cleaning, prophylaxis, teeth whitening both in-office and consultative, annual dental examinations, routine checkups, bitewing and panoramic X-rays, and full-mouth X-ray series. She also provides periodontal maintenance, gum pocket measurement, periodontal disease screening, tooth sensitivity assessments, and adolescent checkups with fluoride varnish.",
+    "keywords": "broken tooth trauma lost crown exposed nerve severe periodontitis flare-up porcelain crown fitting three-unit bridge preparation porcelain veneer ceramic inlay crown preparation professional teeth cleaning prophylaxis teeth whitening in-office annual dental examination adolescent checkup fluoride varnish tooth sensitivity assessment panoramic X-ray periodontal maintenance gum pocket measurement teeth whitening consultation routine dental checkup full-mouth X-ray periodontal disease screening cleaning bitewing X-rays prophylaxis cleaning recall"
+  },
+  {
+    "id": "DR004",
+    "name": "Dr. Elisabeth Huber",
+    "specialization": "General Dentist & Prosthodontics",
+    "description": "Dr. Huber is a general dentist specialising in restorative dentistry and prosthetic work. She repairs and relines full and partial dentures, handles fractured full dentures and denture clasp repairs, and replaces old metal-ceramic crowns. She places composite and amalgam fillings including occlusal, proximal, and multi-surface cases, and fabricates custom bite guards for bruxism patients. She performs routine prophylaxis cleaning, annual dental examinations, dental checkups with bitewing X-rays, fluoride applications, and sensitivity desensitisation treatments for dentine hypersensitivity. She also handles small fillings combined with routine checkups.",
+    "keywords": "fractured full denture unable to eat complex multi-surface filling old crown replacement worn metal-ceramic partial denture clasp repair reline dentine hypersensitivity desensitisation treatment dental checkup bitewing X-rays simple occlusal filling prophylaxis cleaning polishing proximal filling full denture inspection reline composite filling cleaning fluoride application annual dental examination partial denture check bruxism bite guard custom bite guard overdue prophylaxis small filling routine checkup"
+  },
+  {
+    "id": "DR005",
+    "name": "Dr. Thomas Müller",
+    "specialization": "Orthodontist",
+    "description": "Dr. Müller is an orthodontist managing all fixed and removable orthodontic appliance treatments. He performs routine monthly braces adjustments and tightening, wire changes, and urgent wire breakage repairs. He conducts post-orthodontic retainer checks to monitor alignment stability after brace removal. He treats patients with fixed braces at all stages of treatment and manages orthodontic emergencies involving broken or loose wires.",
+    "keywords": "orthodontic wire breakage urgent adjustment orthodontic adjustment fixed braces tightening wire change post-orthodontic retainer check braces tightening monthly scheduled orthodontics retainer alignment brace removal fixed appliance loose wire broken wire orthodontic emergency"
+  }
+]
