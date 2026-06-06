@@ -10,19 +10,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   const body = await req.json().catch(() => ({} as Record<string, unknown>));
+  console.log("[fonio/outcome] payload:", JSON.stringify(body));
+
   const v = (body.variables ?? body) as Record<string, unknown>;
-  // We pass attempt_id in the outbound `context`, so accept it from context too (round-trip).
+  // attempt_id may arrive top-level (snake/camel), inside context, or inside variables.
   const ctx = (body.context ?? {}) as Record<string, unknown>;
-  const attemptId = (body.attemptId ?? ctx.attempt_id ?? v.attempt_id) as string | undefined;
+  const attemptId = (body.attemptId ?? body.attempt_id ?? ctx.attempt_id ?? v.attempt_id) as string | undefined;
   if (!attemptId) {
     return NextResponse.json({ ok: false, error: "missing attemptId" }, { status: 400 });
   }
 
+  // fonio templating may send booleans as real bools OR strings ("true"/"false") — accept both.
+  const truthy = (x: unknown) => x === true || x === "true";
+  const falsy = (x: unknown) => x === false || x === "false";
+
   let outcome = body.outcome as Outcome | undefined;
   if (!outcome) {
-    if (v.accepted === true) outcome = "yes";
-    else if (v.callback_requested === true) outcome = "callback";
-    else if (v.accepted === false) outcome = "no";
+    if (truthy(v.accepted)) outcome = "yes";
+    else if (truthy(v.callback_requested)) outcome = "callback";
+    else if (falsy(v.accepted)) outcome = "no";
     else outcome = "no_answer";
   }
 

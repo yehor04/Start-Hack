@@ -12,6 +12,7 @@ export type RankedCandidate = {
   patientId: string;
   name: string;
   phone: string;
+  condition: string;
   scored: Scored;
   attempted: boolean;
   attemptStatus: string | null;
@@ -61,6 +62,7 @@ export async function rankCandidates(slotId: string): Promise<RankedCandidate[]>
       patientId: r.patient.id,
       name: r.patient.name,
       phone: r.patient.phone,
+      condition: r.patient.condition,
       scored: r.scored,
       attempted: !!at,
       attemptStatus: at?.status ?? null,
@@ -147,8 +149,13 @@ export async function callNext(slotId: string) {
   await triggerCall({
     attemptId: attempt.id,
     slotId,
-    patient: { name: next.name, phone: next.phone },
-    slot: { startsAt: slot.startsAt, treatment: slot.treatment },
+    patient: { name: next.name, phone: next.phone, condition: next.condition },
+    slot: {
+      startsAt: slot.startsAt,
+      treatment: slot.treatment,
+      practitioner: slot.practitioner ?? "",
+      durationMin: slot.durationMin,
+    },
     pAccept: next.scored.likelihood,
   });
 }

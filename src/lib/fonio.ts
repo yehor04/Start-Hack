@@ -25,8 +25,8 @@ const TIMEOUT_MS = 15_000;
 export type TriggerOpts = {
   attemptId: string;
   slotId: string;
-  patient: { name: string; phone: string };
-  slot: { startsAt: Date; treatment: string };
+  patient: { name: string; phone: string; condition: string };
+  slot: { startsAt: Date; treatment: string; practitioner: string; durationMin: number };
   pAccept: number;
 };
 
@@ -35,6 +35,13 @@ function toE164(raw: string): string | null {
   const t = (raw || "").replace(/[\s()\-.]/g, "");
   return /^\+\d{6,15}$/.test(t) ? t : null;
 }
+
+// Format the slot instant for the assistant prompt, in the clinic's timezone (Vienna).
+const CLINIC_TZ = "Europe/Vienna";
+const fmtDate = (d: Date) =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: CLINIC_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d); // YYYY-MM-DD
+const fmtTime = (d: Date) =>
+  new Intl.DateTimeFormat("en-GB", { timeZone: CLINIC_TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(d); // HH:MM
 
 export async function triggerCall(opts: TriggerOpts): Promise<void> {
   if (LIVE) {
@@ -71,11 +78,15 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
     fromNumber: FROM_NUMBER,
     toNumber,
     context: {
-      attempt_id: opts.attemptId,
-      slot_id: opts.slotId,
+      // The fields the assistant prompt reads as {{context.<key>}}:
       patient_name: opts.patient.name,
-      slot_time: opts.slot.startsAt.toISOString(),
-      treatment: opts.slot.treatment,
+      patient_condition: opts.patient.condition,
+      doctor_name: opts.slot.practitioner,
+      slot_date: fmtDate(opts.slot.startsAt), // "2026-06-07"
+      slot_time: fmtTime(opts.slot.startsAt), // "09:00"
+      slot_duration: String(opts.slot.durationMin),
+      // Not used by the prompt, but our post-call webhook reads it to correlate the outcome:
+      attempt_id: opts.attemptId,
     },
   };
   // fonio's example includes agentId (selects the assistant explicitly); send it when configured.
