@@ -44,12 +44,12 @@ def hard_filter(patients: list, slot: dict) -> tuple:
 
     for p in patients:
         assigned = date.fromisoformat(p["assigned_date"])
-        if assigned >= slot_date:
+        if assigned > slot_date:
             rejected.append({
                 **p,
                 "filter_reason": (
                     f"joined waitlist after slot date "
-                    f"({p['assigned_date']} >= {slot['date']})"
+                    f"({p['assigned_date']} > {slot['date']})"
                 ),
             })
         elif p["procedure_time_min"] > slot["duration_min"]:
@@ -71,16 +71,36 @@ def hard_filter(patients: list, slot: dict) -> tuple:
     return eligible, rejected
 
 
-def _time_match(patient_pref: str, slot_time: str) -> float:
+def _slot_half_day(slot_time: str) -> str:
+    hour = int(slot_time.split(":")[0])
+    return "morning" if hour < 13 else "afternoon"
+
+
+def _time_match(patient_pref: str, patient_preferred_time: str, slot_time: str) -> float:
+    """Score 0–1 for time compatibility.
+
+    Gate 1 — half-day must match (or patient is flexible).
+    Gate 2 — within the correct half-day, score by distance to preferred_time.
+    """
+    slot_half = _slot_half_day(slot_time)
+
+    if patient_pref != "flexible" and patient_pref != slot_half:
+        return 0.0  # wrong half of the day entirely
+
     if patient_pref == "flexible":
-        return 0.7
-    return 1.0 if patient_pref == slot_time else 0.0
+        return 1.0  # accepts any time — full score, no distance penalty
+
+    ph, pm = map(int, patient_preferred_time.split(":"))
+    sh, sm = map(int, slot_time.split(":"))
+    diff_min = abs((ph * 60 + pm) - (sh * 60 + sm))
+    max_diff_min = 180  # 3 hours within the same half-day
+    return max(0.0, 1.0 - diff_min / max_diff_min)
 
 
-def _normalize(value: float, pool: list) -> float:
+def _normalize(value: float, pool: list, penalty: bool = False) -> float:
     lo, hi = min(pool), max(pool)
     if lo == hi:
-        return 0.5
+        return 0.0 if penalty else 0.5
     return (value - lo) / (hi - lo)
 
 
@@ -97,12 +117,12 @@ def score_candidates(candidates: list, slot: dict) -> list:
 
     scored = []
     for p in candidates:
-        urgency      = URGENCY_SCORE[p["urgency"]]
-        time_match   = _time_match(p["time_preference"], slot["time_of_day"])
+        urgency      = URGENCY_SCORE.get(p["urgency"], 0.0)
+        time_match   = _time_match(p["time_preference"], p["preferred_time"], slot["time"])
         days_norm    = _normalize(p["days_on_waitlist"], days_pool)
-        attempt_pen  = _normalize(p["contact_attempts"], attempts_pool)
-        result_pen   = CONTACT_RESULT_PENALTY.get(p["last_contact_result"], 0.0)
-        skipped_pen  = _normalize(p["times_skipped"],    skipped_pool)
+        attempt_pen  = _normalize(p["contact_attempts"], attempts_pool, penalty=True)
+        result_pen   = CONTACT_RESULT_PENALTY.get(p["last_contact_result"], 0.2)
+        skipped_pen  = _normalize(p["times_skipped"],    skipped_pool,  penalty=True)
         cost_norm    = _normalize(p["procedure_cost"],   cost_pool)
 
         score = (
@@ -117,7 +137,7 @@ def score_candidates(candidates: list, slot: dict) -> list:
 
         scored.append({
             **p,
-            "final_score": round(score, 4),
+            "final_score": round(max(0.0, score), 4),
             "breakdown": {
                 "urgency":           round( urgency,     3),
                 "time_match":        round( time_match,  3),
@@ -152,7 +172,7 @@ def print_results(result: dict, top_n: int = 5) -> None:
     slot = result["slot"]
     print("\n" + "═" * 60)
     print(f"  SLOT: {slot['doctor']}")
-    print(f"  {slot['time_of_day'].upper()}  ·  {slot['duration_min']} min  ·  {slot['date']}")
+    print(f"  {slot['time']}  ·  {slot['duration_min']} min  ·  {slot['date']}")
     print("═" * 60)
     print(
         f"  Waitlist: {result['total_on_waitlist']} patients  "
@@ -202,7 +222,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--doctor",   default="Dr. Stefan Bauer")
     parser.add_argument("--duration", type=int, default=75)
-    parser.add_argument("--time",     default="morning", choices=["morning", "afternoon"])
+    parser.add_argument("--time",     default="09:00", help="Slot time, e.g. 09:00 or 14:30")
     parser.add_argument("--date",     default="2026-06-07")
     parser.add_argument("--top",      type=int, default=5)
     args = parser.parse_args()
@@ -210,7 +230,7 @@ if __name__ == "__main__":
     slot = {
         "doctor":       args.doctor,
         "duration_min": args.duration,
-        "time_of_day":  args.time,
+        "time":         args.time,
         "date":         args.date,
     }
 
