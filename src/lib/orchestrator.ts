@@ -88,7 +88,20 @@ export async function startRecovery(slotId: string) {
   const ranked = await rankCandidates(slotId);
   const eligible = ranked.filter((r) => r.scored.eligible && !r.attempted);
   await log("scored", { slotId, candidates: eligible.length, top: eligible[0]?.name ?? null });
-  if (!eligible.length) return escalate(slotId, "no eligible candidates");
+
+  const slot = await db.slot.findUnique({ where: { id: slotId } });
+  console.log("\n────────────────────────────────────────────────────────");
+  console.log(`🦷 SLOT FREED: ${slot?.treatment} · ${slot?.practitioner} · ${slot?.startsAt.toISOString()} · €${slot?.valueEur}`);
+  console.log(`📊 RANKED ${eligible.length} eligible candidate(s):`);
+  eligible.slice(0, 5).forEach((r, i) =>
+    console.log(`   ${i + 1}. ${r.name.padEnd(22)} score ${r.scored.score.toFixed(2)}  📞 ${r.phone}   — ${r.scored.reason}`),
+  );
+  if (!eligible.length) {
+    console.log("   ⚠️  none eligible → escalating to a human.");
+    console.log("────────────────────────────────────────────────────────\n");
+    return escalate(slotId, "no eligible candidates");
+  }
+  console.log("────────────────────────────────────────────────────────\n");
   return callNext(slotId);
 }
 
@@ -98,6 +111,15 @@ export async function callNext(slotId: string) {
   const ranked = await rankCandidates(slotId);
   const next = ranked.find((r) => r.scored.eligible && !r.attempted);
   if (!next) return escalate(slotId, "waitlist exhausted");
+
+  // Safety cap: never place more than N real calls for one slot (protects the credit budget if a
+  // trigger keeps failing and the loop keeps advancing). Tunable via FONIO_MAX_CALLS_PER_SLOT.
+  const priorAttempts = await db.recoveryAttempt.count({ where: { slotId } });
+  const CAP = Number(process.env.FONIO_MAX_CALLS_PER_SLOT ?? 3);
+  if (priorAttempts >= CAP) {
+    console.log(`🛑 call cap (${CAP}) reached for this slot → escalating to a human.`);
+    return escalate(slotId, `call cap (${CAP}) reached`);
+  }
 
   let attempt;
   try {
@@ -121,6 +143,7 @@ export async function callNext(slotId: string) {
     throw e;
   }
   await log("call_started", { slotId, patient: next.name, attemptId: attempt.id });
+  console.log(`\n📞 CALLING #${priorAttempts + 1}: ${next.name}  →  ${next.phone}  (attempt ${attempt.id})`);
   await triggerCall({
     attemptId: attempt.id,
     slotId,

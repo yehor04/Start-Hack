@@ -78,10 +78,14 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
     },
   };
 
+  const url = `${BASE}${OUTBOUND_PATH}`;
+  console.log(`🌐 fonio API → POST ${url}`);
+  console.log(`   from ${FROM_NUMBER}  to ${toNumber}  context.attempt_id=${opts.attemptId}`);
+
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(`${BASE}${OUTBOUND_PATH}`, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -89,10 +93,10 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
     });
     const data = (await res.json().catch(() => ({}))) as { status?: string; message?: string };
     if (!res.ok || data?.status === "error") {
-      console.error("[fonio] outbound_call rejected", { http: res.status, ...data });
+      console.error(`❌ fonio API rejected — HTTP ${res.status}`, data);
       return failAttempt(opts.attemptId);
     }
-    console.log("[fonio] outbound_call placed", { attemptId: opts.attemptId, toNumber });
+    console.log(`✅ fonio API ${res.status} — ${data?.status}: ${data?.message}  → ${toNumber} is ringing\n`);
   } catch (err) {
     console.error("[fonio] outbound_call threw", err);
     return failAttempt(opts.attemptId);

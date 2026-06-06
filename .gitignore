@@ -46,3 +46,7 @@ techbold-case.pdf
 # build cache
 *.tsbuildinfo
 next-env.d.ts
+
+# python caches
+__pycache__/
+*.pyc
