@@ -183,8 +183,9 @@ when real fields appear we change only the adapter — scoring and dashboard nev
 
 ## Demo script (the 3-min video — rehearse this exact run)
 
-1. Cancellation comes in (a dental slot opens).
-2. Dashboard shows the ranked waitlist **with reasons** for the top pick.
+1. **Schedule tab**: receptionist cancels the 17:30 implant appointment → the slot frees
+   (this is the realistic trigger; auto-switches to the Recovery tab).
+2. **Recovery tab** shows the ranked waitlist **with reasons** for the top pick.
 3. Top candidate receives a **real outbound call**; patient says yes.
 4. Slot **books live**; metrics tick up (refill rate, revenue recovered).
 5. **Edge case:** trigger the second slot where the top candidate doesn't answer → system

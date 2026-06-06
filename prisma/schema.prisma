@@ -42,6 +42,8 @@ model Slot {
   room         String?
   status       String   @default("open") // booked | cancelled | open | filling | filled
   valueEur     Int      @default(0)       // perishable value recovered if refilled
+  bookedPatientName String? // occupant of a booked slot (the practice's existing schedule)
+  recoveredBy  String?  // patient name who refilled it via Refill (for the "Recovered ✓" badge)
   createdAt    DateTime @default(now())
 
   attempts     RecoveryAttempt[]

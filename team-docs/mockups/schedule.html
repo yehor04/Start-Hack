@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Refill — Schedule mockup</title>
+<style>
+  :root{
+    --bg:#F6F6F8; --card:#FFFFFF; --ink:#0B0B0F; --muted:#6B6B76; --line:#ECECEF;
+    --indigo:#5B5BD6; --indigo-soft:#EEEEFC; --green:#16A34A; --green-soft:#E9F7EF;
+    --amber:#B45309; --amber-soft:#FBF1E4; --grey-soft:#F1F1F3;
+    --radius:16px; --shadow:0 1px 2px rgba(11,11,15,.04),0 8px 24px rgba(11,11,15,.04);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1100px;margin:0 auto;padding:22px 26px 30px;}
+
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .logo{font-size:23px;font-weight:800;letter-spacing:-.02em;} .logo b{color:var(--indigo);}
+  .sub{color:var(--muted);font-size:13px;border-left:1px solid var(--line);padding-left:12px;}
+  .live{display:flex;align-items:center;gap:7px;background:var(--green-soft);color:var(--green);
+    font-weight:600;font-size:12.5px;padding:7px 12px;border-radius:999px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+
+  /* tabs */
+  .tabs{display:flex;gap:6px;background:var(--grey-soft);padding:5px;border-radius:12px;width:max-content;margin-bottom:18px;}
+  .tab{padding:8px 18px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;}
+  .tab.on{background:#fff;color:var(--ink);box-shadow:var(--shadow);}
+
+  /* date + summary */
+  .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .date{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;}
+  .nav{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--muted);
+    font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .chips{display:flex;gap:8px;}
+  .schip{font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted);}
+  .schip b{color:var(--ink);}
+  .schip.g{background:var(--green-soft);border-color:#CFEBD9;color:var(--green);}
+
+  /* table */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  table{width:100%;border-collapse:collapse;}
+  thead th{text-align:left;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--muted);padding:14px 18px;border-bottom:1px solid var(--line);background:#FCFCFD;}
+  tbody td{padding:15px 18px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  .time{font-weight:700;font-variant-numeric:tabular-nums;}
+  .who{font-weight:600;}
+  .treat{color:#3a3a42;}
+  .doc{color:var(--muted);font-size:12.5px;}
+  .val{font-weight:700;font-variant-numeric:tabular-nums;}
+
+  .st{font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;}
+  .st-booked{background:var(--grey-soft);color:#44444C;}
+  .st-fill{background:var(--indigo-soft);color:var(--indigo);}
+  .st-rec{background:var(--green-soft);color:var(--green);}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--indigo);}
+
+  .act{text-align:right;}
+  .cancel{background:#fff;border:1px solid var(--line);color:#B91C1C;border-radius:9px;
+    padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .cancel:hover{background:#FDF1F1;border-color:#F2C9C9;}
+  .link{color:var(--indigo);font-size:12.5px;font-weight:600;text-decoration:none;}
+  .target td{background:#FBFBFF;}
+  .hint{font-size:11px;color:var(--indigo);font-weight:700;margin-left:8px;}
+  .recby{color:var(--muted);font-size:12px;font-weight:500;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">Re<b>fill</b></div>
+      <div class="sub">Vienna Smile Dental — reception cockpit</div>
+    </div>
+    <div class="live"><span class="dot"></span> Live</div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab on">Schedule</div>
+    <div class="tab">Recovery</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="date"><div class="nav">‹</div> Today · Sat, 6 Jun 2026 <div class="nav">›</div></div>
+    <div class="chips">
+      <span class="schip"><b>7</b> appointments</span>
+      <span class="schip" style="color:var(--indigo);border-color:#D9D9F7"><b style="color:var(--indigo)">1</b> filling</span>
+      <span class="schip g"><b>1</b> recovered · €90</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Time</th><th>Patient</th><th>Treatment</th><th>Practitioner</th><th>Value</th><th>Status</th><th class="act">Action</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="time">09:00</td><td class="who">Anna Keller</td><td class="treat">Hygiene</td>
+          <td class="doc">Dr. Moser</td><td class="val">€90</td>
+          <td><span class="st st-booked">Booked</span></td>
+          <td class="act"><button class="cancel">Cancel</button></td>
+        </tr>
+        <tr>
+          <td class="time">09:30</td><td class="who">Felix Wagner</td><td class="treat">Crown fitting</td>
+          <td class="doc">Dr. Berger</td><td class="val">€350</td>
+          <td><span class="st st-booked">Booked</span></td>
+          <td class="act"><button class="cancel">Cancel</button></td>
+        </tr>
+        <tr>
+          <td class="time">10:30</td><td class="who">Nina Fischer</td><td class="treat">Root canal</td>
+          <td class="doc">Dr. Eder</td><td class="val">€300</td>
+          <td><span class="st st-booked">Booked</span></td>
+          <td class="act"><button class="cancel">Cancel</button></td>
+        </tr>
+        <tr>
+          <td class="time">11:30</td>
+          <td class="who">Lukas Bauer <span class="recby">· via Refill</span></td>
+          <td class="treat">Hygiene</td><td class="doc">Dr. Moser</td><td class="val">€90</td>
+          <td><span class="st st-rec">✓ Recovered</span></td>
+          <td class="act"><span class="recby">filled 13:54</span></td>
+        </tr>
+        <tr>
+          <td class="time">14:00</td>
+          <td class="who">— <span class="recby">cancelled by patient</span></td>
+          <td class="treat">Ortho adjustment</td><td class="doc">Dr. Berger</td><td class="val">€120</td>
+          <td><span class="st st-fill"><span class="pulse"></span> Filling…</span></td>
+          <td class="act"><a class="link" href="#">View in Recovery →</a></td>
+        </tr>
+        <tr>
+          <td class="time">15:30</td><td class="who">David Fuchs</td><td class="treat">Crown fitting</td>
+          <td class="doc">Dr. Eder</td><td class="val">€350</td>
+          <td><span class="st st-booked">Booked</span></td>
+          <td class="act"><button class="cancel">Cancel</button></td>
+        </tr>
+        <tr class="target">
+          <td class="time">17:30</td><td class="who">Maria Schmid</td>
+          <td class="treat">Implant consultation</td><td class="doc">Dr. Berger</td><td class="val">€450</td>
+          <td><span class="st st-booked">Booked</span></td>
+          <td class="act"><button class="cancel">Cancel</button><span class="hint">demo →</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

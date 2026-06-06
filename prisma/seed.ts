@@ -95,6 +95,26 @@ async function main() {
     practitioner: "Dr. Berger", room: "OP 1", status: "open",
   }});
 
+  // ---------------- TODAY'S SCHEDULE (booked appointments for the Schedule view) ----------------
+  // The receptionist sees these; cancelling one frees the slot and triggers the recovery loop.
+  // The 17:30 implant is the DEMO cancel target (its waitlist = the demo cohort above).
+  const today: Array<[number, number, string, string, string]> = [
+    // [hour, minute, patientName, treatment, practitioner]
+    [9, 0,  "Anna Keller",  "hygiene",         "Dr. Moser"],
+    [9, 30, "Felix Wagner", "crown_fitting",   "Dr. Berger"],
+    [10, 30,"Nina Fischer", "root_canal",      "Dr. Eder"],
+    [11, 30,"Paul Steiner", "hygiene",         "Dr. Moser"],
+    [14, 0, "Clara Hofer",  "ortho_adjust",    "Dr. Berger"],
+    [15, 30,"David Fuchs",  "crown_fitting",   "Dr. Eder"],
+    [17, 30,"Maria Schmid", "implant_consult", "Dr. Berger"], // <- demo cancel target
+  ];
+  for (const [hh, mm, who, tr, doc] of today) {
+    await db.slot.create({ data: {
+      startsAt: daysAt(0, hh, mm), treatment: tr, valueEur: TREATMENTS[tr],
+      practitioner: doc, status: "booked", bookedPatientName: who,
+    }});
+  }
+
   // ---------------- BULK POPULATION (simulation harness) ----------------
   const treatments = Object.keys(TREATMENTS);
   for (let i = 0; i < 28; i++) {
@@ -128,7 +148,7 @@ async function main() {
     }});
   }
 
-  console.log("Seed complete: demo cohort + 28 bulk patients + open slots.");
+  console.log("Seed complete: demo cohort + today's schedule + 28 bulk patients + open slots.");
 }
 
 main()
