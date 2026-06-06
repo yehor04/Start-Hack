@@ -18,7 +18,7 @@ type Raw = {
 };
 
 // Patients we deliberately mark as NO-CONSENT to demo the GDPR gate.
-// P001 (Maria Gruber) is an urgent Dr. Bauer/morning patient — she'd rank top, so excluding
+// P001 (Maria Gruber) is an urgent Dr. Berger/morning patient — she'd rank top, so excluding
 // her makes the consent gate visible right at the top of the list.
 const NO_CONSENT = new Set(["P001", "P020", "P044"]);
 
@@ -68,18 +68,21 @@ async function main() {
     });
   }
 
-  // ---- today's schedule (booked appointments) ----
+  // ---- today's schedule (booked appointments) — matches the green design mockups ----
   // Each row: [hh, mm, patientName, treatment, doctor, durationMin, valueEur]
-  // The 17:30 Dr. Stefan Bauer root canal is the DEMO cancel target — cancelling it pulls his
-  // waitlist (urgent endodontic patients) into the recovery loop.
+  // The 17:30 Dr. Berger implant consultation is the DEMO cancel target — cancelling it pulls
+  // Dr. Berger's waitlist (urgent endodontic / implant patients) into the recovery loop.
+  // NOTE: duration is 90 min (the mockup shows 30) so candidates whose procedures need 45–90 min
+  // stay eligible — a 30 min slot would hard-filter the whole Berger cohort out and the demo would
+  // escalate with no candidates.
   const schedule: [number, number, string, string, string, number, number][] = [
-    [9, 0, "Johanna Reiter", "Hygiene", "Dr. Anna Wagner", 30, 90],
-    [9, 30, "Markus Lang", "Crown fitting", "Dr. Elisabeth Huber", 60, 350],
-    [10, 30, "Petra Kofler", "Root canal", "Dr. Stefan Bauer", 75, 450],
-    [11, 30, "Georg Brunner", "Filling", "Dr. Michael Gruber", 45, 180],
-    [14, 0, "Sandra Holzer", "Check-up", "Dr. Thomas Müller", 30, 80],
-    [15, 30, "Daniel Auer", "Crown fitting", "Dr. Anna Wagner", 60, 350],
-    [17, 30, "Maria Schmid", "Root canal", "Dr. Stefan Bauer", 90, 550], // <- demo cancel target
+    [9, 0, "Anna Keller", "Hygiene", "Dr. Moser", 30, 90],
+    [9, 30, "Felix Wagner", "Crown fitting", "Dr. Berger", 60, 350],
+    [10, 30, "Nina Fischer", "Root canal", "Dr. Eder", 75, 300],
+    [11, 30, "Lukas Bauer", "Hygiene", "Dr. Moser", 30, 90],
+    [14, 0, "Jonas Hofer", "Ortho adjustment", "Dr. Berger", 60, 120],
+    [15, 30, "David Fuchs", "Crown fitting", "Dr. Eder", 60, 350],
+    [17, 30, "Maria Schmid", "Implant consultation", "Dr. Berger", 90, 450], // <- demo cancel target
   ];
   for (const [hh, mm, who, treatment, doctor, durationMin, valueEur] of schedule) {
     await db.slot.create({
