@@ -32,8 +32,8 @@ for the owner.
 ### Setup
 ```bash
 npm install
-cp .env.example .env        # set DATABASE_URL (+ DIRECT_URL), fonio creds, FONIO_WEBHOOK_SECRET, DEMO_PHONE_1..3
-npx prisma migrate dev      # create the Postgres schema (uses DIRECT_URL if set)
+cp .env.example .env        # set DATABASE_URL, fonio creds, FONIO_WEBHOOK_SECRET, DEMO_PHONE_1..3
+npx prisma migrate dev      # create the Postgres schema
 npx prisma db seed          # load the dental demo data + bulk population
 npm run dev                 # dashboard + fonio webhook endpoints
 ```

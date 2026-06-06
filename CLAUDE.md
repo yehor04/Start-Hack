@@ -32,8 +32,8 @@ end-to-end in simulation** (`FONIO_LIVE=false`): cancel → rank → call → bo
 the consent gate and an audit trail. **Open item:** wire the real fonio outbound trigger in
 `src/lib/fonio.ts` (stub is commented) and set `FONIO_LIVE=true`.
 
-DB is **Postgres** (Neon/Supabase) so fonio's cloud can reach the API once deployed; set
-`DATABASE_URL` (+ optional non-pooled `DIRECT_URL` for migrations). fonio auth uses
+DB is **Postgres** (Neon/Supabase) so fonio's cloud can reach the API once deployed; set a single
+`DATABASE_URL` (Neon direct/non-pooled URL is simplest). fonio auth uses
 `FONIO_WEBHOOK_SECRET` on both `/api/fonio/outcome` (write) and `/api/fonio/slots` (live read).
 
 Run: `cp .env.example .env && npm install && npx prisma migrate dev && npm run seed && npm run dev`

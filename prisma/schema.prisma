@@ -7,11 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  // Poolers (Neon/Supabase pgbouncer) need a direct connection for migrations.
-  // Set DIRECT_URL to the non-pooled URL; falls back to DATABASE_URL if unset.
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Patient {
