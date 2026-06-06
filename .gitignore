@@ -1,0 +1,44 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# env / secrets — NEVER commit
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# database (local SQLite)
+*.db
+*.db-journal
+prisma/dev.db
+prisma/*.db
+
+# next.js / build
+.next/
+out/
+build/
+dist/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# os / editor
+.DS_Store
+.idea/
+*.swp
+
+# misc
+coverage/
+.vercel
+
+# other tracks' case briefs (keep the repo focused on fonio)
+glasses.md
+notarity-case.pdf
+robodog-case.pdf
+techbold-case.pdf
