@@ -109,3 +109,22 @@ Integrations** config. Until found, the assistant is testable via the in-app **T
 4. Place one real call to a teammate phone → confirm: structured variables arrive at our webhook,
    and note the **latency** (call end → webhook fired).
 5. Record what the webhook payload actually looks like and paste it back here.
+
+## ⚠️ Outbound calling setup (from the fonio Discord)
+
+- **The internal fonio number is NOT allowed for outbound by default.** Our +493082687385
+  (assigned to Lena) is inbound-only → that's why "No outbound phone numbers available".
+- **Fix:** set up a real outbound number — official guide (Loom):
+  https://www.loom.com/share/fc67a879ec6c44a383f432451f137c99 (Phone Numbers → Add Number /
+  Create SIP Number / Import Number). The fonio team **will enable outbound on request** — always
+  **state your account** when asking (ours: "Hack Start GmbH 14").
+- **International restriction:** calling across countries can throw `outOfBounds` / "outbound not
+  allowed" (e.g. +36 → +43). Use a number whose region matches the phones you'll call, or ask the
+  team to **allow international**. Tell them which destination country your test phones are in.
+- **Minutes:** ~**750 outbound minutes** available on the account (the "2 credits" shown is just
+  telco cost; team will top up if blocked). Plenty for testing.
+- **There IS a REST API to trigger outbound calls** (teams in the channel call it directly) — get
+  the exact endpoint from More → Open Documentation. The CSV "Outbound Campaigns" is the batch
+  tool, NOT what we want for event-driven single calls.
+- **Prompt tip (Marco):** in Lena's prompt add a pronunciation note — "read numbers as words
+  (1 = one, 2 = two…), and read symbols/units in full" — fixes AI mis-reading digits, esp. non-EN.
