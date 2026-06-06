@@ -19,6 +19,7 @@ const BASE = (process.env.FONIO_API_BASE_URL || "https://app.fonio.ai").replace(
 const OUTBOUND_PATH = process.env.FONIO_OUTBOUND_PATH || "/api/public/v1/outbound_call";
 const API_KEY = process.env.FONIO_API_KEY || "";
 const FROM_NUMBER = process.env.FONIO_FROM_NUMBER || "";
+const AGENT_ID = process.env.FONIO_AGENT_ID || "";
 const TIMEOUT_MS = 15_000;
 
 export type TriggerOpts = {
@@ -66,7 +67,7 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
 
   // context = the variables the assistant prompt / extraction can read as {{context.<key>}}.
   // attempt_id is the critical one: it round-trips so the outcome webhook can correlate the call.
-  const body = {
+  const body: Record<string, unknown> = {
     fromNumber: FROM_NUMBER,
     toNumber,
     context: {
@@ -77,6 +78,8 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
       treatment: opts.slot.treatment,
     },
   };
+  // fonio's example includes agentId (selects the assistant explicitly); send it when configured.
+  if (AGENT_ID) body.agentId = AGENT_ID;
 
   const url = `${BASE}${OUTBOUND_PATH}`;
   console.log(`🌐 fonio API → POST ${url}`);
