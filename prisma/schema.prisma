@@ -1,13 +1,17 @@
 // Refill — unified data model (Olha's richer ranker fields adopted).
-// SQLite for hack speed. The waitlist = Patient rows with onWaitlist = true.
+// Postgres so the app is reachable by fonio's cloud once deployed (Vercel + Neon/Supabase).
+// The waitlist = Patient rows with onWaitlist = true.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Poolers (Neon/Supabase pgbouncer) need a direct connection for migrations.
+  // Set DIRECT_URL to the non-pooled URL; falls back to DATABASE_URL if unset.
+  directUrl = env("DIRECT_URL")
 }
 
 model Patient {

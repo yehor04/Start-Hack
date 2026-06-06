@@ -26,19 +26,29 @@ for the owner.
 
 ### Prerequisites
 - Node.js 20+
+- A Postgres database (Neon / Supabase free tier — must be reachable from fonio's cloud)
 - A fonio.ai account (provisioned for the track) with API access
 
 ### Setup
 ```bash
 npm install
-cp .env.example .env        # fill in fonio creds + DEMO_PHONE_1..3 (real phones, with consent)
-npx prisma migrate dev      # create the local SQLite schema
+cp .env.example .env        # set DATABASE_URL (+ DIRECT_URL), fonio creds, FONIO_WEBHOOK_SECRET, DEMO_PHONE_1..3
+npx prisma migrate dev      # create the Postgres schema (uses DIRECT_URL if set)
 npx prisma db seed          # load the dental demo data + bulk population
 npm run dev                 # dashboard + fonio webhook endpoints
 ```
 
-For local fonio webhook testing, expose your dev server with a tunnel (e.g. `ngrok http 3000`)
-and register the public URL as the fonio API Request / Inbound Webhook target.
+fonio is a cloud service and cannot reach `localhost` or a local file DB — that's why the database
+is Postgres and the app needs a public HTTPS URL. **Deploy to Vercel** for a stable URL, or for
+local testing tunnel with `ngrok http 3000`. Register the public URL with fonio.
+
+### fonio endpoints (register these in the assistant)
+- **Outbound webhook** (fonio → us, after each call): `POST {PUBLIC_BASE_URL}/api/fonio/outcome`
+- **Inbound read tool** (assistant → us, mid-call, live availability):
+  `GET {PUBLIC_BASE_URL}/api/fonio/slots` and `…/api/fonio/slots?slotId=<id>`
+
+Both are authenticated with `FONIO_WEBHOOK_SECRET`, presented as `Authorization: Bearer <secret>`,
+an `x-fonio-secret` header, or a `?secret=` query param.
 
 ## Configuration
 
@@ -46,7 +56,7 @@ See `.env.example`. Never commit `.env` (it is git-ignored).
 
 ## Architecture & assumptions
 
-- **Stack:** Next.js (TypeScript) + Prisma/SQLite + SSE for live updates.
+- **Stack:** Next.js (TypeScript) + Prisma/Postgres + SSE for live updates.
 - **Data model:** CORE fields (any source has them) vs ENRICHMENT (optional; scoring degrades
   gracefully when missing). A thin adapter normalizes any source into the internal model.
 - **fonio:** Outbound Call API (trigger + variables), API Request (outcome webhook),

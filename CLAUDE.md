@@ -27,10 +27,14 @@ seed data, copy, call dialog, and the pitch are in **English**.
 
 ## Status (updated 2026-06-06)
 
-The app is **built and runs** (Next.js + Prisma + SQLite). The full loop is **verified
+The app is **built and runs** (Next.js + Prisma + Postgres). The full loop is **verified
 end-to-end in simulation** (`FONIO_LIVE=false`): cancel → rank → call → book / advance, with
 the consent gate and an audit trail. **Open item:** wire the real fonio outbound trigger in
 `src/lib/fonio.ts` (stub is commented) and set `FONIO_LIVE=true`.
+
+DB is **Postgres** (Neon/Supabase) so fonio's cloud can reach the API once deployed; set
+`DATABASE_URL` (+ optional non-pooled `DIRECT_URL` for migrations). fonio auth uses
+`FONIO_WEBHOOK_SECRET` on both `/api/fonio/outcome` (write) and `/api/fonio/slots` (live read).
 
 Run: `cp .env.example .env && npm install && npx prisma migrate dev && npm run seed && npm run dev`
 (→ http://localhost:3000, patient page `/p/demo`).
@@ -102,7 +106,7 @@ Account: trial to 2026-06-13. Assistant **Lena** is connected to **+493082687385
 ## Tech stack
 
 - **Next.js (TypeScript), App Router** — dashboard + API routes (fonio webhooks) in one app.
-- **Prisma + SQLite** for speed in the hack (Postgres-compatible schema; swap if time allows).
+- **Prisma + Postgres** (Neon/Supabase) — reachable by fonio's cloud once deployed.
 - **Server-Sent Events** for live dashboard updates (simpler than WebSocket for one-way).
 - **One LLM call** to generate the human-readable "why this candidate" rationale.
 - **Tailwind** for fast, clean UI.
