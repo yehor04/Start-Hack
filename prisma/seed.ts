@@ -15,12 +15,13 @@ type Raw = {
   days_on_waitlist: number; assigned_date: string; contact_attempts: number;
   last_contact_result: string; times_skipped: number; procedure_cost: number;
   procedure_time_min: number; phone: string;
+  consent: boolean; opted_out: boolean;
 };
 
-// Patients we deliberately mark as NO-CONSENT to demo the GDPR gate.
-// P001 (Maria Gruber) is an urgent Dr. Berger/morning patient — she'd rank top, so excluding
-// her makes the consent gate visible right at the top of the list.
-const NO_CONSENT = new Set(["P001", "P020", "P044"]);
+// Outbound consent (GDPR hard gate) comes straight from the dataset: a patient is callable only
+// if they consented AND have not opted out. (In the Dr. Berger demo cohort this excludes P017,
+// P023, P031, so the consent gate is visible in the recovery list.)
+const hasOutboundConsent = (p: Raw) => p.consent === true && p.opted_out !== true;
 
 const hrs = (h: number) => new Date(Date.now() + h * 3_600_000);
 const todayAt = (hh: number, mm = 0) => {
@@ -50,7 +51,7 @@ async function main() {
         name: p.name,
         phone: overridePhone || p.phone,
         age: p.age,
-        consentOutbound: !NO_CONSENT.has(p.id),
+        consentOutbound: hasOutboundConsent(p),
         onWaitlist: true,
         urgency: p.urgency,
         condition: p.condition,
@@ -101,7 +102,7 @@ async function main() {
 
   const counts = {
     patients: raw.length,
-    noConsent: NO_CONSENT.size,
+    noConsent: raw.filter((p) => !hasOutboundConsent(p)).length,
     slots: schedule.length,
   };
   console.log("Seed complete:", counts);
