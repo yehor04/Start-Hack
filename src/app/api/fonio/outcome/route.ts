@@ -11,7 +11,9 @@ export async function POST(req: Request) {
   }
   const body = await req.json().catch(() => ({} as Record<string, unknown>));
   const v = (body.variables ?? body) as Record<string, unknown>;
-  const attemptId = (body.attemptId ?? v.attempt_id) as string | undefined;
+  // We pass attempt_id in the outbound `context`, so accept it from context too (round-trip).
+  const ctx = (body.context ?? {}) as Record<string, unknown>;
+  const attemptId = (body.attemptId ?? ctx.attempt_id ?? v.attempt_id) as string | undefined;
   if (!attemptId) {
     return NextResponse.json({ ok: false, error: "missing attemptId" }, { status: 400 });
   }

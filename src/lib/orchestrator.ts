@@ -6,7 +6,7 @@ import { db } from "./db";
 import { rankPool, type PatientLite, type Scored } from "./scoring";
 import { triggerCall } from "./fonio";
 
-export type Outcome = "yes" | "no" | "no_answer" | "voicemail" | "callback";
+export type Outcome = "yes" | "no" | "no_answer" | "voicemail" | "callback" | "failed";
 
 export type RankedCandidate = {
   patientId: string;
