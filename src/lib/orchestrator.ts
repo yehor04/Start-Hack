@@ -17,7 +17,8 @@ export type Outcome =
   | "voicemail"
   | "no_answer"
   | "wrong_person"
-  | "failed";
+  | "failed"
+  | "human_requested";
 
 export type RankedCandidate = {
   patientId: string;
@@ -172,7 +173,7 @@ export async function callNext(slotId: string) {
   });
 }
 
-export async function handleOutcome(attemptId: string, outcome: Outcome) {
+export async function handleOutcome(attemptId: string, outcome: Outcome, meta?: { summary?: string }) {
   const attempt = await db.recoveryAttempt.findUnique({
     where: { id: attemptId },
     include: { patient: true, slot: true },
@@ -181,9 +182,9 @@ export async function handleOutcome(attemptId: string, outcome: Outcome) {
 
   await db.recoveryAttempt.update({
     where: { id: attemptId },
-    data: { status: outcome, resolvedAt: new Date() },
+    data: { status: outcome, resolvedAt: new Date(), reasonText: meta?.summary ?? attempt.reasonText },
   });
-  await log("outcome", { slotId: attempt.slotId, patient: attempt.patient.name, outcome });
+  await log("outcome", { slotId: attempt.slotId, patient: attempt.patient.name, outcome, summary: meta?.summary ?? null });
 
   const patientId = attempt.patientId;
   const patch = (data: Record<string, unknown>) => db.patient.update({ where: { id: patientId }, data });
@@ -222,6 +223,15 @@ export async function handleOutcome(attemptId: string, outcome: Outcome) {
     case "wrong_person": // Case 9 — not the patient's fault: no skip, no result change.
       await patch({ contactAttempts: { increment: 1 } });
       break;
+
+    case "human_requested": // Caller asked for a human → AI call ends, flag reception + keep the summary.
+      await patch({ contactAttempts: { increment: 1 } });
+      await log("human_requested", {
+        slotId: attempt.slotId,
+        patient: attempt.patient.name,
+        summary: meta?.summary ?? null,
+      });
+      break; // slot still needs filling → advance to the next candidate
 
     case "failed": // Case 8 — technical/connection failure: not a real attempt; flag for review.
       await log("call_failed", { slotId: attempt.slotId, patient: attempt.patient.name, note: "technical failure — manual review" });

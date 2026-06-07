@@ -55,9 +55,11 @@ export async function POST(req: Request) {
     const maybe = norm(deepFind(body, ["maybe", "unsure", "undecided", "callback_requested", "callback"]) ?? q.get("maybe"));
     const optout = norm(deepFind(body, ["opt_out", "optout", "do_not_contact", "do_not_call", "never_call"]) ?? q.get("opt_out"));
     const wrong = norm(deepFind(body, ["wrong_person", "wrong_number", "not_the_patient"]) ?? q.get("wrong_person"));
+    const human = norm(deepFind(body, ["human_requested", "speak_to_human", "wants_human", "transfer_to_human", "human"]) ?? q.get("human_requested"));
     const status = norm(deepFind(body, ["call_status", "callStatus", "outcome_status", "status"]));
 
     if (YES.has(optout)) outcome = "optout"; // Case 1
+    else if (YES.has(human)) outcome = "human_requested"; // caller wants a human
     else if (YES.has(wrong)) outcome = "wrong_person"; // Case 9
     else if (YES.has(accepted)) outcome = "yes"; // Case 2
     else if (YES.has(maybe)) outcome = "maybe"; // Case 5
@@ -67,10 +69,14 @@ export async function POST(req: Request) {
     else if (/fail|error|busy|abandon|cancel/.test(status)) outcome = "failed"; // Case 8
     else outcome = "no_answer";
   }
+  // Capture fonio's AI conversation summary so the dashboard can show what was discussed.
+  const summary = (deepFind(body, ["summary", "call_summary", "conversation_summary"]) ?? undefined) as
+    | string
+    | undefined;
   console.log(`[fonio/outcome] attempt=${attemptId} -> ${outcome}`);
 
   try {
-    await handleOutcome(attemptId, outcome as Outcome);
+    await handleOutcome(attemptId, outcome as Outcome, { summary });
   } catch (err) {
     console.error("[fonio/outcome] handleOutcome failed", err);
     return NextResponse.json({ ok: false, error: "processing failed" }, { status: 500 });

@@ -160,6 +160,7 @@ function statusPill(st: string) {
   if (st === "optout") return <span className="pill p-inel">Opted out</span>;
   if (st === "wrong_person") return <span className="pill p-skip">Wrong person</span>;
   if (st === "failed") return <span className="pill p-skip">Call failed</span>;
+  if (st === "human_requested") return <span className="pill p-call">Wants human</span>;
   return <span className="pill p-queue">{st}</span>;
 }
 function urgencyChip(u: number) {
@@ -317,6 +318,15 @@ function Event({ type, payload, at }: { type: string; payload: string; at: strin
     callback: { dot: "i", text: <><b>Calling back</b> {p.patient}</> },
     call_failed: { dot: "m", text: <><b>Call failed</b> — {p.patient} (manual review)</> },
     lost: { dot: "m", text: <><b>Slot lost ⏰</b> — expired ({euro(p.revenueLost ?? 0)} lost)</> },
+    human_requested: {
+      dot: "a",
+      text: (
+        <>
+          <b>📞 Caller wants a human</b> — {p.patient}
+          {p.summary ? <div className="reason">{p.summary}</div> : null}
+        </>
+      ),
+    },
   };
   const m = map[type] ?? { dot: "m", text: <b>{type}</b> };
   return (
