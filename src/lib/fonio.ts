@@ -13,6 +13,7 @@
 // so fromNumber MUST be an outbound-enabled number whose assistant is the recovery agent.
 
 import type { Outcome } from "./orchestrator";
+import { db } from "./db";
 
 const LIVE = process.env.FONIO_LIVE === "true";
 const BASE = (process.env.FONIO_API_BASE_URL || "https://app.fonio.ai").replace(/\/$/, "");
@@ -27,6 +28,7 @@ export type TriggerOpts = {
   slotId: string;
   patient: { name: string; phone: string; condition: string };
   slot: { startsAt: Date; treatment: string; practitioner: string; durationMin: number };
+  procedureMinutes: number; // how long THIS patient's procedure needs — used to filter reschedule options
   pAccept: number;
 };
 
@@ -42,6 +44,35 @@ const fmtDate = (d: Date) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: CLINIC_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d); // YYYY-MM-DD
 const fmtTime = (d: Date) =>
   new Intl.DateTimeFormat("en-GB", { timeZone: CLINIC_TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(d); // HH:MM
+// "Mon, 09 Jun at 14:00 with Dr. Bauer" — human-readable for the assistant to read aloud.
+const fmtSlotHuman = (d: Date, practitioner: string) =>
+  `${new Intl.DateTimeFormat("en-GB", { timeZone: CLINIC_TZ, weekday: "short", day: "2-digit", month: "short" }).format(d)} at ${fmtTime(d)}${practitioner ? ` with ${practitioner}` : ""}`;
+
+// We can't query the DB mid-call (fonio's Tools feature isn't enabled on this account), so we read
+// the DB BEFORE the call and pre-load the valid reschedule options into context. We only include
+// slots that are BOTH empty AND long enough for this patient's procedure (procedureMinutes), so the
+// feasibility check is baked into the data: if the time the caller wants isn't in this list, the
+// assistant simply tells them it's not possible — no live lookup needed.
+// Best-effort: a failure here must never abort the call.
+async function buildAlternativeSlots(currentSlotId: string, procedureMinutes: number): Promise<string> {
+  try {
+    const others = await db.slot.findMany({
+      where: {
+        id: { not: currentSlotId },
+        status: { in: ["open", "filling"] },
+        startsAt: { gt: new Date() },
+        durationMin: { gte: procedureMinutes }, // must fit the procedure
+      },
+      orderBy: { startsAt: "asc" },
+      take: 8,
+    });
+    if (!others.length) return "None — there are no other openings that fit this appointment.";
+    return others.map((s) => fmtSlotHuman(s.startsAt, s.practitioner ?? "")).join("; ");
+  } catch (err) {
+    console.error("[fonio] buildAlternativeSlots failed (non-fatal)", err);
+    return "";
+  }
+}
 
 export async function triggerCall(opts: TriggerOpts): Promise<void> {
   if (LIVE) {
@@ -72,6 +103,9 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
     return failAttempt(opts.attemptId);
   }
 
+  // Read the DB before placing the call and bundle in the valid reschedule options (empty + fit).
+  const alternativeSlots = await buildAlternativeSlots(opts.slotId, opts.procedureMinutes);
+
   // context = the variables the assistant prompt / extraction can read as {{context.<key>}}.
   // attempt_id is the critical one: it round-trips so the outcome webhook can correlate the call.
   const body: Record<string, unknown> = {
@@ -85,6 +119,10 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
       slot_date: fmtDate(opts.slot.startsAt), // "2026-06-07"
       slot_time: fmtTime(opts.slot.startsAt), // "09:00"
       slot_duration: String(opts.slot.durationMin),
+      // Pre-loaded from the DB: the ONLY times this patient can reschedule to (empty + long enough
+      // for their procedure). If the time they want isn't here, the assistant says it's not possible.
+      // e.g. "Tue, 10 Jun at 09:00 with Dr. Wagner; Wed, 11 Jun at 14:30 with Dr. Bauer".
+      reschedule_options: alternativeSlots,
       // Not used by the prompt, but our post-call webhook reads it to correlate the outcome:
       attempt_id: opts.attemptId,
     },

@@ -13,6 +13,8 @@ export type Outcome =
   | "yes"
   | "no"
   | "maybe"
+  | "reschedule"
+  | "cancel"
   | "optout"
   | "voicemail"
   | "no_answer"
@@ -25,6 +27,7 @@ export type RankedCandidate = {
   name: string;
   phone: string;
   condition: string;
+  procedureTimeMin: number;
   scored: Scored;
   attempted: boolean;
   attemptStatus: string | null;
@@ -75,6 +78,7 @@ export async function rankCandidates(slotId: string): Promise<RankedCandidate[]>
       name: r.patient.name,
       phone: r.patient.phone,
       condition: r.patient.condition,
+      procedureTimeMin: r.patient.procedureTimeMin,
       scored: r.scored,
       attempted: !!at,
       attemptStatus: at?.status ?? null,
@@ -169,20 +173,27 @@ export async function callNext(slotId: string) {
       practitioner: slot.practitioner ?? "",
       durationMin: slot.durationMin,
     },
+    procedureMinutes: next.procedureTimeMin,
     pAccept: next.scored.likelihood,
   });
 }
 
-export async function handleOutcome(attemptId: string, outcome: Outcome, meta?: { summary?: string }) {
+export async function handleOutcome(
+  attemptId: string,
+  outcome: Outcome,
+  meta?: { summary?: string; preferredAlternative?: string },
+) {
   const attempt = await db.recoveryAttempt.findUnique({
     where: { id: attemptId },
     include: { patient: true, slot: true },
   });
   if (!attempt || attempt.resolvedAt) return; // idempotent
 
+  // For a reschedule, the most useful thing to keep is the time they asked for; otherwise the summary.
+  const note = meta?.preferredAlternative ?? meta?.summary;
   await db.recoveryAttempt.update({
     where: { id: attemptId },
-    data: { status: outcome, resolvedAt: new Date(), reasonText: meta?.summary ?? attempt.reasonText },
+    data: { status: outcome, resolvedAt: new Date(), reasonText: note ?? attempt.reasonText },
   });
   await log("outcome", { slotId: attempt.slotId, patient: attempt.patient.name, outcome, summary: meta?.summary ?? null });
 
@@ -211,6 +222,23 @@ export async function handleOutcome(attemptId: string, outcome: Outcome, meta?: 
     case "maybe": // Case 5 — Unsure: NOT penalised; gets a callback if everyone else falls through.
       await log("maybe", { slotId: attempt.slotId, patient: attempt.patient.name });
       break; // patient record intentionally unchanged
+
+    case "reschedule": // Wants a DIFFERENT time than the offered slot: stays on the waitlist (engaged,
+      // not penalised); reception follows up with the time they asked for. This slot still needs filling.
+      // NOTE: the free-text preferred time is logged for reception, NOT written to patient.preferredTime
+      // (that field is parsed as HH:MM by the scorer — free text would break ranking).
+      await patch({ contactAttempts: { increment: 1 } });
+      await log("reschedule", {
+        slotId: attempt.slotId,
+        patient: attempt.patient.name,
+        preferred: meta?.preferredAlternative ?? null,
+      });
+      break; // advance to the next candidate for THIS slot
+
+    case "cancel": // Wants to withdraw: take them off the waitlist (consent kept — they didn't say never call).
+      await patch({ onWaitlist: false, contactAttempts: { increment: 1 } });
+      await log("cancel", { slotId: attempt.slotId, patient: attempt.patient.name });
+      break; // the slot still needs filling → advance
 
     case "voicemail": // Case 6
       await patch({ contactAttempts: { increment: 1 }, lastContactResult: "voicemail" });
@@ -279,6 +307,7 @@ async function callbackOrEscalate(slotId: string) {
           practitioner: slot.practitioner ?? "",
           durationMin: slot.durationMin,
         },
+        procedureMinutes: m.patient.procedureTimeMin,
         pAccept: m.pAccept ?? 0.5,
       });
       return;

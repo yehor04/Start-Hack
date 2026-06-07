@@ -168,6 +168,8 @@ function statusPill(st: string) {
   if (st === "callback") return <span className="pill p-skip">Callback</span>;
   if (st === "maybe") return <span className="pill p-queue">Maybe — callback</span>;
   if (st === "optout") return <span className="pill p-inel">Opted out</span>;
+  if (st === "reschedule") return <span className="pill p-queue">Wants reschedule</span>;
+  if (st === "cancel") return <span className="pill p-inel">Cancelled</span>;
   if (st === "wrong_person") return <span className="pill p-skip">Wrong person</span>;
   if (st === "failed") return <span className="pill p-skip">Call failed</span>;
   if (st === "human_requested") return <span className="pill p-call">Wants human</span>;
@@ -324,6 +326,16 @@ function Event({ type, payload, at }: { type: string; payload: string; at: strin
     booked: { dot: "g", text: <><b>Booked ✓</b> — {p.patient} ({euro(p.value ?? 0)})</> },
     escalated: { dot: "m", text: <><b>Escalated</b> — {p.why}</> },
     optout: { dot: "m", text: <><b>Opted out</b> — {p.patient} removed from waitlist</> },
+    reschedule: {
+      dot: "a",
+      text: (
+        <>
+          <b>🔄 Wants to reschedule</b> — {p.patient}
+          {p.preferred ? <div className="reason">Prefers: {p.preferred}</div> : null}
+        </>
+      ),
+    },
+    cancel: { dot: "m", text: <><b>Cancelled</b> — {p.patient} withdrew from waitlist</> },
     maybe: { dot: "a", text: <><b>Maybe</b> — {p.patient} (callback if needed)</> },
     callback: { dot: "i", text: <><b>Calling back</b> {p.patient}</> },
     call_failed: { dot: "m", text: <><b>Call failed</b> — {p.patient} (manual review)</> },

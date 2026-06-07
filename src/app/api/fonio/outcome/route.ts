@@ -56,12 +56,16 @@ export async function POST(req: Request) {
     const optout = norm(deepFind(body, ["opt_out", "optout", "do_not_contact", "do_not_call", "never_call"]) ?? q.get("opt_out"));
     const wrong = norm(deepFind(body, ["wrong_person", "wrong_number", "not_the_patient"]) ?? q.get("wrong_person"));
     const human = norm(deepFind(body, ["human_requested", "speak_to_human", "wants_human", "transfer_to_human", "human"]) ?? q.get("human_requested"));
+    const reschedule = norm(deepFind(body, ["reschedule_requested", "reschedule", "different_time", "another_time"]) ?? q.get("reschedule"));
+    const cancel = norm(deepFind(body, ["cancel_requested", "cancel", "withdraw", "remove_from_waitlist"]) ?? q.get("cancel"));
     const status = norm(deepFind(body, ["call_status", "callStatus", "outcome_status", "status"]));
 
-    if (YES.has(optout)) outcome = "optout"; // Case 1
+    if (YES.has(optout)) outcome = "optout"; // Case 1 — never contact again
+    else if (YES.has(cancel)) outcome = "cancel"; // wants to withdraw from the waitlist
     else if (YES.has(human)) outcome = "human_requested"; // caller wants a human
     else if (YES.has(wrong)) outcome = "wrong_person"; // Case 9
-    else if (YES.has(accepted)) outcome = "yes"; // Case 2
+    else if (YES.has(accepted)) outcome = "yes"; // Case 2 — accepted the offered slot
+    else if (YES.has(reschedule)) outcome = "reschedule"; // declines this time, wants a different one
     else if (YES.has(maybe)) outcome = "maybe"; // Case 5
     else if (NO.has(accepted)) outcome = "no"; // Case 3
     else if (/voicemail|voice_mail|mailbox/.test(status)) outcome = "voicemail"; // Case 6
@@ -73,10 +77,13 @@ export async function POST(req: Request) {
   const summary = (deepFind(body, ["summary", "call_summary", "conversation_summary"]) ?? undefined) as
     | string
     | undefined;
+  // For a reschedule, the time/day they asked for (free text, e.g. "Tuesday morning").
+  const preferredAlternative = (deepFind(body, ["preferred_alternative", "preferred_time", "preferred_day", "new_time"]) ??
+    undefined) as string | undefined;
   console.log(`[fonio/outcome] attempt=${attemptId} -> ${outcome}`);
 
   try {
-    await handleOutcome(attemptId, outcome as Outcome, { summary });
+    await handleOutcome(attemptId, outcome as Outcome, { summary, preferredAlternative });
   } catch (err) {
     console.error("[fonio/outcome] handleOutcome failed", err);
     return NextResponse.json({ ok: false, error: "processing failed" }, { status: 500 });
