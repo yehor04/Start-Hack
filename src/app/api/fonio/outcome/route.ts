@@ -69,9 +69,10 @@ export async function POST(req: Request) {
     else if (NO.has(accepted)) outcome = "no"; // Case 3 — declined
     else if (/voicemail|voice_mail|mailbox/.test(status)) outcome = "voicemail"; // Case 6
     else if (/no[-_ ]?answer|unanswered|noanswer/.test(status)) outcome = "no_answer"; // Case 7
-    else if (/fail|error|busy|abandon/.test(status)) outcome = "failed"; // Case 8
-    else if (YES.has(wrong)) outcome = "wrong_person"; // Case 9 — last resort: someone else answered
-    else outcome = "no_answer";
+    else if (/fail|error|busy|abandon|cancel/.test(status)) outcome = "failed"; // Case 8
+    // wrong_person only when call_status confirms the call was picked up (not no-answer/cancelled)
+    else if (YES.has(wrong) && /completed|answered/.test(status)) outcome = "wrong_person";
+    else outcome = "no_answer"; // catch-all: unanswered, cancelled, or ambiguous
   }
   // Capture fonio's AI conversation summary so the dashboard can show what was discussed.
   const summary = (deepFind(body, ["summary", "call_summary", "conversation_summary"]) ?? undefined) as

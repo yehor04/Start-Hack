@@ -92,9 +92,11 @@ export async function cancelSlot(slotId: string, source = "reception") {
   if (!slot) throw new Error("slot not found");
   if (slot.status === "filling") return slot; // idempotent
 
+  // Set to "filling" directly — skipping "open" avoids markExpiredSlots race-condition where a
+  // past-timed slot would be immediately marked "lost" between the two updates.
   await db.slot.update({
     where: { id: slotId },
-    data: { status: "open", bookedPatientName: null, recoveredBy: null },
+    data: { status: "filling", bookedPatientName: null, recoveredBy: null },
   });
   await log("cancellation", { slotId, source, treatment: slot.treatment, value: slot.valueEur });
   await startRecovery(slotId);
