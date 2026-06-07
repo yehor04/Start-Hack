@@ -29,7 +29,6 @@ export type Scored = {
   score: number; // 0..1
   urgency: number; // 0..1 (display)
   likelihood: number; // 0..1 (display: "likely to take it")
-  fit: number; // 0..1 (display)
   factors: Factor[];
   reason: string;
 };
@@ -114,7 +113,6 @@ export function rankPool(slot: SlotLite, patients: PatientLite[]): Ranked[] {
           WEIGHTS.skipped * sP,
       );
       const likelihood = clamp(0.35 + 0.45 * tm + 0.2 * (1 - rP) - 0.15 * aP);
-      const fit = clamp(0.5 + 0.5 * dN - 0.3 * sP);
 
       const factors: Factor[] = [
         { label: "Urgency", value: u, positive: u >= 0.5, detail: p.urgency },
@@ -136,7 +134,7 @@ export function rankPool(slot: SlotLite, patients: PatientLite[]): Ranked[] {
 
       out.push({
         patient: p,
-        scored: { eligible: true, score, urgency: u, likelihood, fit, factors, reason: buildReason(p, tm, rP) },
+        scored: { eligible: true, score, urgency: u, likelihood, factors, reason: buildReason(p, tm, rP) },
       });
     }
     out.sort((a, b) => b.scored.score - a.scored.score);
@@ -145,7 +143,7 @@ export function rankPool(slot: SlotLite, patients: PatientLite[]): Ranked[] {
   for (const r of rejected) {
     out.push({
       patient: r.p,
-      scored: { eligible: false, score: 0, urgency: 0, likelihood: 0, fit: 0, factors: [], reason: r.why },
+      scored: { eligible: false, score: 0, urgency: 0, likelihood: 0, factors: [], reason: r.why },
     });
   }
   return out;

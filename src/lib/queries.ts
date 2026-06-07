@@ -42,7 +42,6 @@ export async function getActiveRecovery() {
     urgency: r.scored.urgency,
     eligible: r.scored.eligible,
     reason: r.scored.reason,
-    factors: r.scored.factors,
     status: r.attemptStatus ?? (r.scored.eligible ? "queued" : "excluded"),
   }));
 
