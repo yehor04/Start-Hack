@@ -21,7 +21,6 @@ const OUTBOUND_PATH = process.env.FONIO_OUTBOUND_PATH || "/api/public/v1/outboun
 const API_KEY = process.env.FONIO_API_KEY || "";
 const FROM_NUMBER = process.env.FONIO_FROM_NUMBER || "";
 const AGENT_ID = process.env.FONIO_AGENT_ID || "";
-const CANCEL_PATH = process.env.FONIO_CANCEL_PATH || "/api/public/v1/outbound_call/{id}/cancel";
 const TIMEOUT_MS = 15_000;
 
 // Simulation: track pending call timers so cancelCall() can abort them immediately.
@@ -180,34 +179,17 @@ async function failAttempt(attemptId: string): Promise<void> {
   }
 }
 
-/** Best-effort: hang up an in-progress call. In sim mode clears the timer; in live mode calls fonio API. */
-export async function cancelCall(fonioCallId: string | null, attemptId?: string): Promise<void> {
-  // Simulation: immediately clear the pending outcome timer.
-  if (!LIVE) {
-    if (attemptId && pendingSimCalls.has(attemptId)) {
-      clearTimeout(pendingSimCalls.get(attemptId)!);
-      pendingSimCalls.delete(attemptId);
-      console.log(`🔕 SIM: cancelled pending call timer for attempt ${attemptId}`);
-    }
-    return;
-  }
-  if (!API_KEY || !fonioCallId) {
-    console.warn("[fonio] cancelCall: no fonioCallId available — call will ring until fonio timeout");
-    return;
-  }
-  const path = CANCEL_PATH.replace("{id}", encodeURIComponent(fonioCallId));
-  const url = `${BASE}${path}`;
-  console.log(`🔕 fonio cancel → POST ${url}`);
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(5_000),
-    });
-    const body = await res.text();
-    console.log(`🔕 fonio cancel ${fonioCallId} → HTTP ${res.status} — ${body}`);
-  } catch (err) {
-    console.warn("[fonio] cancelCall failed (non-fatal):", err);
+/**
+ * Cancel an in-progress call. In simulation mode, clears the pending timer immediately.
+ * In live mode, fonio's public API has no cancel endpoint — the call rings until fonio's
+ * own timeout. We still resolve the attempt in the DB so the outcome webhook is ignored
+ * and no new call is placed.
+ */
+export async function cancelCall(_fonioCallId: string | null, attemptId?: string): Promise<void> {
+  if (!LIVE && attemptId && pendingSimCalls.has(attemptId)) {
+    clearTimeout(pendingSimCalls.get(attemptId)!);
+    pendingSimCalls.delete(attemptId);
+    console.log(`🔕 SIM: cancelled pending call timer for attempt ${attemptId}`);
   }
 }
 
