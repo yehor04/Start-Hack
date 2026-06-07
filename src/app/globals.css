@@ -175,8 +175,22 @@ tbody tr:last-child td{border-bottom:none}
 .patient-app .nudge{margin-top:18px;background:var(--green-soft);border:1px solid var(--mint);border-radius:18px;padding:16px 17px;display:flex;align-items:flex-start;gap:13px}
 .patient-app .nudge .nt{font-size:13.5px;font-weight:700;color:var(--green)}
 .patient-app .nudge .nd{font-size:12.5px;color:#3a5249;margin-top:3px;line-height:1.5}
-.patient-app .switch{flex:0 0 44px;width:44px;height:26px;border-radius:999px;background:var(--green);position:relative;margin-top:2px}
-.patient-app .switch::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+.patient-app .switch{flex:0 0 44px;width:44px;height:26px;border-radius:999px;background:var(--green);position:relative;margin-top:2px;border:none;cursor:pointer;padding:0;transition:background .18s}
+.patient-app .switch::after{content:"";position:absolute;top:3px;left:21px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .18s}
+.patient-app .switch.off{background:#C9D2CC}
+.patient-app .switch.off::after{left:3px}
+.patient-app .switch:disabled{opacity:.7;cursor:default}
+.patient-app .resched{margin-top:4px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.patient-app .resched-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:700;color:var(--green)}
+.patient-app .resched-close{background:none;border:none;font-size:14px;color:var(--muted);cursor:pointer;line-height:1}
+.patient-app .resched-empty{padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.5}
+.patient-app .resched-opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:14px 16px;cursor:pointer;font-family:inherit}
+.patient-app .resched-opt:last-child{border-bottom:none}
+.patient-app .resched-opt:hover{background:var(--green-soft)}
+.patient-app .resched-opt:disabled{opacity:.5;cursor:default}
+.patient-app .ro-when{font-size:13.5px;font-weight:700}
+.patient-app .ro-doc{font-size:12.5px;color:var(--muted);flex:1}
+.patient-app .ro-go{font-size:12.5px;font-weight:700;color:var(--green)}
 .patient-app .done{background:#fff;border:1px solid var(--mint);border-radius:24px;box-shadow:var(--shadow);padding:30px 24px;text-align:center}
 .patient-app .done h2{font-family:var(--serif);font-weight:600;font-size:22px;margin:14px 0 8px}
 .patient-app .done p{font-size:13.5px;color:var(--muted);line-height:1.55;margin:0}

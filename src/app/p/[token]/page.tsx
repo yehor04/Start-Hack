@@ -1,11 +1,14 @@
-import { getDemoAppointment } from "@/lib/queries";
+import { getDemoAppointment, getPatientByName } from "@/lib/queries";
 import { treatmentLabel, timeLabel } from "@/lib/format";
 import CancelButton from "./CancelButton";
+import RescheduleButton from "./RescheduleButton";
+import SeenSoonerToggle from "./SeenSoonerToggle";
 
 export const dynamic = "force-dynamic";
 
 export default async function PatientPage() {
   const appt = await getDemoAppointment();
+  const patient = await getPatientByName(appt?.bookedPatientName);
 
   return (
     <div className="patient-app">
@@ -23,7 +26,7 @@ export default async function PatientPage() {
         </div>
 
         {appt && appt.status === "booked" ? (
-          <Booked appt={appt} />
+          <Booked appt={appt} patient={patient} />
         ) : (
           <div>
             <p className="hi">Thanks{appt?.recoveredBy ? "" : ""},</p>
@@ -46,7 +49,7 @@ export default async function PatientPage() {
   );
 }
 
-function Booked({ appt }: { appt: any }) {
+function Booked({ appt, patient }: { appt: any; patient: any }) {
   const d = new Date(appt.startsAt);
   const month = d.toLocaleDateString("en-GB", { month: "short" }).toUpperCase();
   const day = d.getDate();
@@ -94,7 +97,7 @@ function Booked({ appt }: { appt: any }) {
       </div>
 
       <div className="actions">
-        <button className="btn primary">Reschedule appointment</button>
+        <RescheduleButton slotId={appt.id} />
         <CancelButton slotId={appt.id} />
       </div>
 
@@ -103,7 +106,11 @@ function Booked({ appt }: { appt: any }) {
           <div className="nt">Want to be seen sooner?</div>
           <div className="nd">If an earlier slot opens up, we’ll call you to offer it. You can opt out any time.</div>
         </div>
-        <div className="switch" />
+        {patient ? (
+          <SeenSoonerToggle name={patient.name} initial={patient.consentOutbound} />
+        ) : (
+          <div className="switch" />
+        )}
       </div>
 
       <div className="foot">

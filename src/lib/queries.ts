@@ -82,6 +82,12 @@ export async function getSlotAttempts() {
   });
 }
 
+/** The patient record behind the demo appointment (for the consent toggle on the patient page). */
+export async function getPatientByName(name: string | null | undefined) {
+  if (!name) return null;
+  return db.patient.findFirst({ where: { name } });
+}
+
 export async function getDemoAppointment() {
   // The patient page shows our demo cancel target: the 17:30 Root canal (Maria Schmid), as seeded.
   // Match by patient name; fall back to the LATEST booked slot (not the earliest) so the page still

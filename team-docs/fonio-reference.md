@@ -61,19 +61,90 @@ The shipped example:
 
 > Note from fonio: always allow `null`, otherwise the AI hallucinates content to fill fields.
 
-**Our extraction schema for the recovery call** (define in the assistant):
+### ✅ FINAL extraction schema for the recovery call (paste into the assistant)
+
+Every field allows `null` (fonio's rule — stops the AI hallucinating). Each maps to an outcome the
+backend already handles (`src/app/api/fonio/outcome/route.ts` → `handleOutcome`).
 
 ```json
 {
-  "accepted":            { "type": ["boolean", "null"], "description": "Did the patient accept the offered appointment slot? true=yes, false=no, null=unclear" },
-  "callback_requested":  { "type": ["boolean", "null"], "description": "Did they ask to be called back later?" },
-  "preferred_alternative": { "type": ["string", "null"], "description": "Any alternative time/day they'd prefer instead" },
-  "reason_declined":     { "type": ["string", "null"], "description": "Short reason if they declined" }
+  "accepted":              { "type": ["boolean", "null"], "description": "Did the patient accept the offered appointment slot? true = yes, false = no, null = unclear" },
+  "reschedule_requested":  { "type": ["boolean", "null"], "description": "Did the caller want a DIFFERENT time, and was it one of the available reschedule_options? null if not discussed" },
+  "preferred_alternative": { "type": ["string", "null"],  "description": "If rescheduling, the exact time/day the caller chose, e.g. 'Tuesday 10 June at 09:00'" },
+  "cancel_requested":      { "type": ["boolean", "null"], "description": "Did the caller ask to cancel or be removed from the waitlist (but did NOT say never contact them)?" },
+  "opt_out":               { "type": ["boolean", "null"], "description": "Did the caller ask to NEVER be contacted again / withdraw consent? Stronger than cancel" },
+  "callback_requested":    { "type": ["boolean", "null"], "description": "Was the caller unsure and asked to be called back later (a 'maybe')?" },
+  "wrong_person":          { "type": ["boolean", "null"], "description": "Did someone other than the patient answer / wrong number?" },
+  "human_requested":       { "type": ["boolean", "null"], "description": "Did the caller ask to speak to a human / be transferred to a person?" },
+  "reason_declined":       { "type": ["string", "null"],  "description": "Short reason the caller gave if they declined" }
 }
 ```
 
+**Field → outcome → backend action:**
+
+| Field set | Outcome | Backend does |
+|---|---|---|
+| `accepted: true` | yes | books the slot, stops the loop |
+| `accepted: false` | no | declines, deprioritised, advance |
+| `reschedule_requested: true` | reschedule | keeps on waitlist, logs `preferred_alternative`, advance |
+| `cancel_requested: true` | cancel | removes from waitlist (consent kept), advance |
+| `opt_out: true` | optout | consent OFF, off waitlist forever, advance |
+| `callback_requested: true` | maybe | no penalty, one callback if all else fails |
+| `wrong_person: true` | wrong_person | logs it, advance |
+| `human_requested: true` | human_requested | ends call, flags reception + summary, advance |
+
+**Precedence** when several are true (backend tiebreak):
+`opt_out → cancel → human_requested → wrong_person → accepted → reschedule → callback → no`.
+
+**NOT extracted** (fonio provides automatically): `summary` (built-in call summary, shown on the
+dashboard) and the call **status** (voicemail / no-answer / failed → the backend reads the call-status
+field directly). So: 9 fields above + auto summary/status = full coverage of every outcome.
+
 This means **we do NOT need to parse transcripts** for the happy path — fonio returns structured
 intent. (Keep a transcript-fallback only as defense in depth.)
+
+## Call context we PUSH per outbound call (read as `{{context.<key>}}`)
+
+Set by `src/lib/fonio.ts` when triggering the call. The assistant prompt reads these:
+
+| key | value | used for |
+|---|---|---|
+| `patient_name` | e.g. "Maria Schmid" | greeting |
+| `patient_condition` | e.g. "Implant consultation" | what the appointment is |
+| `doctor_name` | e.g. "Dr. Stefan Bauer" | who they'll see |
+| `slot_date` / `slot_time` / `slot_duration` | "2026-06-07" / "17:30" / "90" | the offered slot |
+| `reschedule_options` | "Tue, 10 Jun at 09:00 with Dr. Wagner; …" | the ONLY times this patient can move to (empty **and** long enough for their procedure). If a desired time isn't here → not possible |
+| `attempt_id` | internal id | round-trips to the outcome webhook |
+
+> `reschedule_options` is pre-filtered server-side to slots that are open **and** `durationMin >=
+> procedureTimeMin`. The feasibility check is baked into the data — the assistant just checks
+> membership, no mid-call lookup needed.
+
+## Custom Prompt / Instructions — add this block
+
+> You are offering {{context.patient_name}} the slot on {{context.slot_date}} at {{context.slot_time}}
+> with {{context.doctor_name}} ({{context.slot_duration}} min), for their {{context.patient_condition}}.
+>
+> — If the caller wants a **different time**, the ONLY times they can move to are:
+> **{{context.reschedule_options}}** (these already have enough time for their procedure). If the time
+> they want is in that list, confirm it works, set `reschedule_requested = true`, and put their chosen
+> time in `preferred_alternative`. If it's NOT in that list, tell them that time isn't possible for
+> their appointment and offer a listed time or the original slot instead.
+>
+> — If the caller wants to **cancel / be removed from the waitlist**, confirm and set `cancel_requested = true`.
+> — If they ask to **never be contacted again**, set `opt_out = true`.
+> — If they want to **speak to a human**, say a colleague will call them back, set `human_requested = true`, and end the call.
+> — If they **accept** the offered slot, set `accepted = true`.
+
+## Note: mid-call DB Tools (API-Request) — NOT enabled on our account
+
+fonio *does* have a mid-call **API-Request Tool** ("Add Tool" → "API-Request") that can query our
+own HTTPS endpoints live during a call (`docs.fonio.ai/Tools`). It's how the assistant would answer
+*arbitrary* DB questions. **Our trial account does not expose a Tools section** — ask the fonio team
+to enable it (account "Hack Start GmbH 14") if needed. Until then we avoid mid-call lookups entirely
+by pre-loading `reschedule_options` into context (above). The read-only endpoints
+`/api/fonio/patient` and `/api/fonio/slots` (secret `?secret=88554466`) exist and are ready to wire
+as Tools the moment it's enabled — they NEVER write (fonio reads; our post-call webhook writes).
 
 ## Other technical toggles seen
 
