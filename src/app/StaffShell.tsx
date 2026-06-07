@@ -93,7 +93,10 @@ export default function StaffShell() {
           {tab === "schedule" ? (
             <Schedule slots={s?.schedule ?? []} onCancel={cancel} onView={() => setTab("recovery")} />
           ) : (
-            <Recovery rec={s?.recovery ?? null} kpis={s?.kpis} />
+            <Recovery rec={s?.recovery ?? null} kpis={s?.kpis} onStop={async (id) => {
+              await fetch(`/api/slots/${id}/stop-recovery`, { method: "POST" }).catch(() => {});
+              load();
+            }} />
           )}
         </>
       )}
@@ -180,7 +183,7 @@ function urgencyChip(u: number) {
   return <span className="chip a">Urgency: {lvl}</span>;
 }
 
-function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] }) {
+function Recovery({ rec, kpis, onStop }: { rec: State["recovery"]; kpis?: State["kpis"]; onStop: (id: string) => void }) {
   if (!rec) {
     return (
       <div className="panel"><div className="empty">No active recovery. Go to <b>Schedule</b> and cancel an appointment to start the loop.</div></div>
@@ -256,7 +259,7 @@ function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] 
             <div className="ph"><h3>Human control</h3><div className="mt">always in the loop</div></div>
             <div className="pb">
               <div className="controls"><div className="ctl">Skip candidate</div><div className="ctl">Pause auto-dial</div><div className="ctl">Call manually</div></div>
-              <div className="controls" style={{ marginTop: 9 }}><div className="ctl stop">Stop recovery for this slot</div></div>
+              <div className="controls" style={{ marginTop: 9 }}><div className="ctl stop" onClick={() => onStop(slot.id)} style={{ cursor: "pointer" }}>Stop recovery for this slot</div></div>
             </div>
           </div>
           {featured && (
@@ -325,6 +328,7 @@ function Event({ type, payload, at }: { type: string; payload: string; at: strin
     outcome: { dot: p.outcome === "yes" ? "g" : "a", text: <><b>{String(p.outcome).replace(/_/g, " ")}</b> — {p.patient}</> },
     booked: { dot: "g", text: <><b>Booked ✓</b> — {p.patient} ({euro(p.value ?? 0)})</> },
     escalated: { dot: "m", text: <><b>Escalated</b> — {p.why}</> },
+    stopped: { dot: "m", text: <><b>Stopped manually</b> — recovery cancelled by staff</> },
     optout: { dot: "m", text: <><b>Opted out</b> — {p.patient} removed from waitlist</> },
     reschedule: {
       dot: "a",

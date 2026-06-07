@@ -269,6 +269,14 @@ export async function handleOutcome(
   await callNext(attempt.slotId);
 }
 
+export async function stopRecovery(slotId: string) {
+  await db.slot.update({ where: { id: slotId }, data: { status: "escalated" } });
+  await db.eventLog.create({
+    data: { type: "stopped", slotId, payload: JSON.stringify({ slotId, why: "stopped manually by staff" }) },
+  });
+  console.log(`🛑 RECOVERY STOPPED manually for slot ${slotId}`);
+}
+
 async function escalate(slotId: string, why: string) {
   // Distinct terminal status so the UI shows "needs human" instead of looking like it's still
   // filling forever. The recovery loop does NOT auto-restart an escalated slot.
