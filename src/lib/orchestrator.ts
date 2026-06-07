@@ -163,6 +163,16 @@ export async function callNext(slotId: string) {
     if ((e as { code?: string }).code === "P2002") return;
     throw e;
   }
+
+  // Final guard: re-read slot status right before dialling. stopRecovery may have run while we
+  // were ranking/creating the attempt. If so, abort and resolve the attempt so the loop truly stops.
+  const slotNow = await db.slot.findUnique({ where: { id: slotId } });
+  if (!slotNow || slotNow.status === "stopped" || slotNow.status === "escalated" || slotNow.status === "filled") {
+    await db.recoveryAttempt.update({ where: { id: attempt.id }, data: { status: "failed", resolvedAt: new Date() } });
+    console.log(`🛑 slot ${slotId} is ${slotNow?.status ?? "gone"} — aborting call for ${next.name}`);
+    return;
+  }
+
   await log("call_started", { slotId, patient: next.name, attemptId: attempt.id });
   console.log(`\n📞 CALLING #${priorAttempts + 1}: ${next.name}  →  ${next.phone}  (attempt ${attempt.id})`);
   await triggerCall({
