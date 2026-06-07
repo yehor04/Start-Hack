@@ -29,9 +29,9 @@ export async function getActiveRecovery() {
     include: { slot: true },
   });
   const slot =
-    (lastAttempt?.slot && ["filling", "filled", "open", "escalated"].includes(lastAttempt.slot.status)
+    (lastAttempt?.slot && ["filling", "filled", "open", "escalated", "lost"].includes(lastAttempt.slot.status)
       ? lastAttempt.slot
-      : null) ?? (await db.slot.findFirst({ where: { status: "filling" } }));
+      : null) ?? (await db.slot.findFirst({ where: { status: { in: ["filling", "escalated"] } } }));
   if (!slot) return null;
 
   const ranked = await rankCandidates(slot.id);
