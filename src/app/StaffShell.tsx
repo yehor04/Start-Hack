@@ -170,6 +170,8 @@ function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] 
   }
   const { slot, candidates, activity } = rec;
   const calling = candidates.find((c) => c.status === "calling");
+  const resolved = candidates.find((c) => ["yes", "no", "no_answer", "voicemail"].includes(c.status));
+  const featured = calling ?? resolved;
   return (
     <>
       <div className="kpis">
@@ -237,6 +239,47 @@ function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] 
               <div className="controls" style={{ marginTop: 9 }}><div className="ctl stop">Stop recovery for this slot</div></div>
             </div>
           </div>
+          {featured && (
+            <div className="panel">
+              <div className="ph"><h3>Why {featured.name}?</h3><div className="mt">dispatcher reasoning</div></div>
+              <div className="pb">
+                {featured.status === "calling" && (
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12, color:"#5a8fcf", fontWeight:600 }}>
+                    <span className="pulse" style={{ width:8, height:8, borderRadius:"50%", background:"currentColor", flexShrink:0 }} />
+                    <span>On call now</span>
+                  </div>
+                )}
+                {featured.status === "yes" && (
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12, color:"#6fcf97", fontWeight:600 }}>
+                    <span>✓</span><span>Accepted — slot booked</span>
+                  </div>
+                )}
+                {featured.status === "no" && (
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12, color:"#C98A6A", fontWeight:600 }}>
+                    <span>✗</span><span>Declined — trying next candidate</span>
+                  </div>
+                )}
+                {(featured.status === "no_answer" || featured.status === "voicemail") && (
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12, color:"#D9B873", fontWeight:600 }}>
+                    <span>↻</span>
+                    <span>{featured.status === "voicemail" ? "Voicemail left" : "No answer"} — retrying</span>
+                  </div>
+                )}
+                <div className="reason" style={{ fontSize:14, lineHeight:1.7 }}>
+                  {featured.reason}
+                </div>
+                {featured.status === "yes" && (
+                  <div style={{ marginTop:16, padding:"12px 14px", background:"rgba(111,207,151,0.08)", borderRadius:8, border:"1px solid rgba(111,207,151,0.2)" }}>
+                    <div style={{ fontWeight:600, fontSize:13, marginBottom:6 }}>Booking confirmed</div>
+                    <div style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.6 }}>
+                      <div>{timeLabel(slot.startsAt)} · {treatmentLabel(slot.treatment)}</div>
+                      <div>{slot.practitioner ?? "—"} · {slot.room ?? "—"}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <div className="panel">
             <div className="ph"><h3>Live activity</h3><div className="mt">audit trail</div></div>
             <div className="pb">
