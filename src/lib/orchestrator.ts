@@ -287,10 +287,8 @@ export async function stopRecovery(slotId: string) {
       where: { id: active.id },
       data: { status: "failed", resolvedAt: new Date() },
     });
-    // Best-effort: hang up the live fonio call immediately (non-fatal if it fails).
-    if (active.fonioCallId) {
-      cancelCall(active.fonioCallId).catch(() => {});
-    }
+    // Best-effort: hang up the call immediately — works in sim (clears timer) and live (fonio API).
+    cancelCall(active.fonioCallId, active.id).catch(() => {});
   }
 }
 

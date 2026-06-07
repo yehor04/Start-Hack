@@ -24,6 +24,9 @@ const AGENT_ID = process.env.FONIO_AGENT_ID || "";
 const CANCEL_PATH = process.env.FONIO_CANCEL_PATH || "/api/public/v1/outbound_call/{id}/cancel";
 const TIMEOUT_MS = 15_000;
 
+// Simulation: track pending call timers so cancelCall() can abort them immediately.
+const pendingSimCalls = new Map<string, ReturnType<typeof setTimeout>>();
+
 export type TriggerOpts = {
   attemptId: string;
   slotId: string;
@@ -84,12 +87,14 @@ export async function triggerCall(opts: TriggerOpts): Promise<void> {
   // ---- SIMULATION ----
   const delay = 4000 + Math.random() * 3000;
   const outcome = simulateOutcome(opts.pAccept);
-  setTimeout(() => {
+  const timer = setTimeout(() => {
+    pendingSimCalls.delete(opts.attemptId);
     // dynamic import avoids a circular import at module load
     import("./orchestrator")
       .then((m) => m.handleOutcome(opts.attemptId, outcome))
       .catch((err) => console.error("[fonio sim] outcome failed", err));
   }, delay);
+  pendingSimCalls.set(opts.attemptId, timer);
 }
 
 async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
@@ -144,12 +149,15 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
       body: JSON.stringify(body),
       signal: ctrl.signal,
     });
-    const data = (await res.json().catch(() => ({}))) as { status?: string; message?: string; id?: string; callId?: string; call_id?: string };
+    const rawText = await res.text().catch(() => "");
+    console.log(`[fonio] outbound_call raw response: ${rawText}`);
+    let data: Record<string, unknown> = {};
+    try { data = JSON.parse(rawText); } catch {}
     if (!res.ok || data?.status === "error") {
       console.error(`❌ fonio API rejected — HTTP ${res.status}`, data);
       return failAttempt(opts.attemptId);
     }
-    const fonioCallId = data.id ?? data.callId ?? data.call_id ?? null;
+    const fonioCallId = (data.id ?? data.callId ?? data.call_id ?? data.callid ?? null) as string | null;
     if (fonioCallId) {
       await db.recoveryAttempt.update({ where: { id: opts.attemptId }, data: { fonioCallId } }).catch(() => {});
     }
@@ -172,18 +180,32 @@ async function failAttempt(attemptId: string): Promise<void> {
   }
 }
 
-/** Best-effort: hang up an in-progress fonio call by ID. Non-fatal — logs and continues if it fails. */
-export async function cancelCall(fonioCallId: string): Promise<void> {
-  if (!LIVE || !API_KEY || !fonioCallId) return;
+/** Best-effort: hang up an in-progress call. In sim mode clears the timer; in live mode calls fonio API. */
+export async function cancelCall(fonioCallId: string | null, attemptId?: string): Promise<void> {
+  // Simulation: immediately clear the pending outcome timer.
+  if (!LIVE) {
+    if (attemptId && pendingSimCalls.has(attemptId)) {
+      clearTimeout(pendingSimCalls.get(attemptId)!);
+      pendingSimCalls.delete(attemptId);
+      console.log(`🔕 SIM: cancelled pending call timer for attempt ${attemptId}`);
+    }
+    return;
+  }
+  if (!API_KEY || !fonioCallId) {
+    console.warn("[fonio] cancelCall: no fonioCallId available — call will ring until fonio timeout");
+    return;
+  }
   const path = CANCEL_PATH.replace("{id}", encodeURIComponent(fonioCallId));
   const url = `${BASE}${path}`;
+  console.log(`🔕 fonio cancel → POST ${url}`);
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
       signal: AbortSignal.timeout(5_000),
     });
-    console.log(`🔕 fonio cancel ${fonioCallId} → HTTP ${res.status}`);
+    const body = await res.text();
+    console.log(`🔕 fonio cancel ${fonioCallId} → HTTP ${res.status} — ${body}`);
   } catch (err) {
     console.warn("[fonio] cancelCall failed (non-fatal):", err);
   }
