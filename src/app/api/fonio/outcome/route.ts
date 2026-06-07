@@ -61,16 +61,16 @@ export async function POST(req: Request) {
     const status = norm(deepFind(body, ["call_status", "callStatus", "outcome_status", "status"]));
 
     if (YES.has(optout)) outcome = "optout"; // Case 1 — never contact again
-    else if (YES.has(cancel)) outcome = "cancel"; // wants to withdraw from the waitlist
+    else if (YES.has(cancel)) outcome = "cancel"; // wants to withdraw from waitlist
     else if (YES.has(human)) outcome = "human_requested"; // caller wants a human
-    else if (YES.has(wrong)) outcome = "wrong_person"; // Case 9
     else if (YES.has(accepted)) outcome = "yes"; // Case 2 — accepted the offered slot
     else if (YES.has(reschedule)) outcome = "reschedule"; // declines this time, wants a different one
-    else if (YES.has(maybe)) outcome = "maybe"; // Case 5
-    else if (NO.has(accepted)) outcome = "no"; // Case 3
+    else if (YES.has(maybe)) outcome = "maybe"; // Case 5 — unsure, call back later
+    else if (NO.has(accepted)) outcome = "no"; // Case 3 — declined
     else if (/voicemail|voice_mail|mailbox/.test(status)) outcome = "voicemail"; // Case 6
     else if (/no[-_ ]?answer|unanswered|noanswer/.test(status)) outcome = "no_answer"; // Case 7
-    else if (/fail|error|busy|abandon|cancel/.test(status)) outcome = "failed"; // Case 8
+    else if (/fail|error|busy|abandon/.test(status)) outcome = "failed"; // Case 8
+    else if (YES.has(wrong)) outcome = "wrong_person"; // Case 9 — last resort: someone else answered
     else outcome = "no_answer";
   }
   // Capture fonio's AI conversation summary so the dashboard can show what was discussed.
