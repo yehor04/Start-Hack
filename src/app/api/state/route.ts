@@ -11,7 +11,7 @@ export async function GET() {
     getTodaySchedule(),
     getActiveRecovery(),
     getKpis(),
-    getSlotAttempts(),
+    getSlotAttempts().catch(() => []),
   ]);
   return NextResponse.json({ schedule, recovery, kpis, slotAttempts });
 }
