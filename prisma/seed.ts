@@ -29,6 +29,13 @@ const todayAt = (hh: number, mm = 0) => {
   d.setHours(hh, mm, 0, 0);
   return d;
 };
+// `days` ahead at hh:mm — used for OPEN slots that must be in the future (reschedule options).
+const dayAt = (days: number, hh: number, mm = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  d.setHours(hh, mm, 0, 0);
+  return d;
+};
 // Real demo phones (with consent) override the placeholder phones for the first few patients.
 const demoPhone = (n: number) => process.env[`DEMO_PHONE_${n}`] || null;
 
@@ -100,10 +107,37 @@ async function main() {
     });
   }
 
+  // ---- OPEN slots (future, unbooked) — the times a patient can RESCHEDULE into. ----
+  // Spread over the next few days so they're always > now. Some are 90+ min so the demo's 90-min
+  // implant consult (Maria Schmid) has valid reschedule options; the picker filters by duration.
+  // Each row: [daysAhead, hh, mm, treatment, doctor, durationMin, valueEur]
+  const openSlots: [number, number, number, string, string, number, number][] = [
+    [1, 9, 0, "Implant consultation", "Dr. Stefan Bauer", 90, 450],
+    [1, 11, 0, "Hygiene", "Dr. Anna Wagner", 30, 90],
+    [1, 14, 30, "Root canal", "Dr. Elisabeth Huber", 90, 300],
+    [2, 10, 0, "Crown fitting", "Dr. Stefan Bauer", 120, 350],
+    [2, 13, 0, "Hygiene", "Dr. Anna Wagner", 60, 90],
+    [3, 9, 30, "Implant consultation", "Dr. Elisabeth Huber", 90, 450],
+  ];
+  for (const [days, hh, mm, treatment, doctor, durationMin, valueEur] of openSlots) {
+    await db.slot.create({
+      data: {
+        startsAt: dayAt(days, hh, mm),
+        durationMin,
+        treatment,
+        practitioner: doctor,
+        room: "OP 2",
+        status: "open",
+        valueEur,
+      },
+    });
+  }
+
   const counts = {
     patients: raw.length,
     noConsent: raw.filter((p) => !hasOutboundConsent(p)).length,
-    slots: schedule.length,
+    bookedSlots: schedule.length,
+    openSlots: openSlots.length,
   };
   console.log("Seed complete:", counts);
 }
