@@ -55,6 +55,29 @@ export async function getActiveRecovery() {
   return { slot, candidates, activity };
 }
 
+export async function getSlotAttempts() {
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const end = new Date(); end.setHours(23, 59, 59, 999);
+  const slots = await db.slot.findMany({
+    where: { startsAt: { gte: start, lte: end }, status: { in: ["filling", "filled", "escalated"] } },
+    include: { attempts: { where: { resolvedAt: { not: null } } } },
+    orderBy: { startsAt: "asc" },
+  });
+  return slots.map((s) => {
+    const outcomes: Record<string, number> = {};
+    for (const a of s.attempts) outcomes[a.status] = (outcomes[a.status] ?? 0) + 1;
+    return {
+      id: s.id,
+      startsAt: s.startsAt.toISOString(),
+      treatment: s.treatment,
+      practitioner: s.practitioner,
+      slotStatus: s.status,
+      totalAttempts: s.attempts.length,
+      outcomes,
+    };
+  });
+}
+
 export async function getDemoAppointment() {
   // The patient page shows our demo cancel target: the 17:30 Root canal (Maria Schmid), as seeded.
   // Match by patient name; fall back to the LATEST booked slot (not the earliest) so the page still

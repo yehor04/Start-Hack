@@ -23,10 +23,20 @@ type Candidate = {
   reason: string;
   status: string;
 };
+type SlotStat = {
+  id: string;
+  startsAt: string;
+  treatment: string;
+  practitioner: string | null;
+  slotStatus: string;
+  totalAttempts: number;
+  outcomes: Record<string, number>;
+};
 type State = {
   schedule: Slot[];
   recovery: { slot: Slot; candidates: Candidate[]; activity: { id: string; type: string; payload: string; createdAt: string }[] } | null;
   kpis: { recovered: number; revenue: number; open: number; onCall: number };
+  slotAttempts: SlotStat[];
 };
 
 const initials = (n: string) => n.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase();
@@ -70,7 +80,7 @@ export default function StaffShell() {
       </div>
 
       {persona === "owner" ? (
-        <Owner kpis={s?.kpis} />
+        <Owner kpis={s?.kpis} slotAttempts={s?.slotAttempts ?? []} />
       ) : (
         <>
           <div className="tabsrow">
@@ -342,7 +352,7 @@ function Kpi({ lab, v, d, muted }: { lab: string; v: string; d: string; muted?: 
 }
 
 /* ---------------- Owner ---------------- */
-function Owner({ kpis }: { kpis?: State["kpis"] }) {
+function Owner({ kpis, slotAttempts }: { kpis?: State["kpis"]; slotAttempts: SlotStat[] }) {
   return (
     <>
       <div className="hero">
@@ -401,7 +411,71 @@ function Owner({ kpis }: { kpis?: State["kpis"] }) {
           </div>
         </div>
       </div>
+
+      {slotAttempts.length > 0 && (
+        <div className="panel" style={{ marginTop: 18 }}>
+          <div className="ph"><h3>Attempts by slot</h3><div className="mt">today · live</div></div>
+          <div className="pb">
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--rule)" }}>
+                  <th style={{ textAlign: "left", padding: "6px 10px 6px 0", color: "var(--ink-2)", fontWeight: 500 }}>Time</th>
+                  <th style={{ textAlign: "left", padding: "6px 10px", color: "var(--ink-2)", fontWeight: 500 }}>Treatment</th>
+                  <th style={{ textAlign: "left", padding: "6px 10px", color: "var(--ink-2)", fontWeight: 500 }}>Doctor</th>
+                  <th style={{ textAlign: "center", padding: "6px 10px", color: "var(--ink-2)", fontWeight: 500 }}>Attempts</th>
+                  <th style={{ textAlign: "left", padding: "6px 0 6px 10px", color: "var(--ink-2)", fontWeight: 500 }}>Outcomes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {slotAttempts.map((s) => (
+                  <tr key={s.id} style={{ borderBottom: "1px solid var(--rule)" }}>
+                    <td style={{ padding: "8px 10px 8px 0", fontVariantNumeric: "tabular-nums" }}>{timeLabel(s.startsAt)}</td>
+                    <td style={{ padding: "8px 10px" }}>{treatmentLabel(s.treatment)}</td>
+                    <td style={{ padding: "8px 10px", color: "var(--ink-2)" }}>{s.practitioner ?? "—"}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                      <span style={{ fontWeight: 600 }}>{s.totalAttempts}</span>
+                      {s.slotStatus === "filled" && <span style={{ marginLeft: 6, color: "#6fcf97" }}>✓</span>}
+                      {s.slotStatus === "escalated" && <span style={{ marginLeft: 6, color: "#C98A6A" }}>⚠</span>}
+                    </td>
+                    <td style={{ padding: "8px 0 8px 10px" }}>
+                      <OutcomePills outcomes={s.outcomes} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </>
+  );
+}
+
+const OUTCOME_STYLE: Record<string, { label: string; color: string }> = {
+  yes:          { label: "Booked",       color: "#6fcf97" },
+  no:           { label: "Declined",     color: "#C98A6A" },
+  no_answer:    { label: "No answer",    color: "#D9B873" },
+  voicemail:    { label: "Voicemail",    color: "#CBC6BA" },
+  maybe:        { label: "Maybe",        color: "#5a8fcf" },
+  optout:       { label: "Opted out",    color: "#C98A6A" },
+  wrong_person: { label: "Wrong person", color: "#CBC6BA" },
+  failed:       { label: "Failed",       color: "#CBC6BA" },
+};
+
+function OutcomePills({ outcomes }: { outcomes: Record<string, number> }) {
+  const entries = Object.entries(outcomes).filter(([, n]) => n > 0);
+  if (!entries.length) return <span style={{ color: "var(--ink-2)" }}>—</span>;
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+      {entries.map(([status, count]) => {
+        const st = OUTCOME_STYLE[status] ?? { label: status, color: "#CBC6BA" };
+        return (
+          <span key={status} style={{ fontSize: 11, padding: "2px 7px", borderRadius: 10, background: `${st.color}22`, color: st.color, fontWeight: 500, whiteSpace: "nowrap" }}>
+            {st.label} {count}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
