@@ -21,6 +21,7 @@ const OUTBOUND_PATH = process.env.FONIO_OUTBOUND_PATH || "/api/public/v1/outboun
 const API_KEY = process.env.FONIO_API_KEY || "";
 const FROM_NUMBER = process.env.FONIO_FROM_NUMBER || "";
 const AGENT_ID = process.env.FONIO_AGENT_ID || "";
+const CANCEL_PATH = process.env.FONIO_CANCEL_PATH || "/api/public/v1/outbound_call/{id}/cancel";
 const TIMEOUT_MS = 15_000;
 
 export type TriggerOpts = {
@@ -143,12 +144,16 @@ async function triggerLiveCall(opts: TriggerOpts): Promise<void> {
       body: JSON.stringify(body),
       signal: ctrl.signal,
     });
-    const data = (await res.json().catch(() => ({}))) as { status?: string; message?: string };
+    const data = (await res.json().catch(() => ({}))) as { status?: string; message?: string; id?: string; callId?: string; call_id?: string };
     if (!res.ok || data?.status === "error") {
       console.error(`❌ fonio API rejected — HTTP ${res.status}`, data);
       return failAttempt(opts.attemptId);
     }
-    console.log(`✅ fonio API ${res.status} — ${data?.status}: ${data?.message}  → ${toNumber} is ringing\n`);
+    const fonioCallId = data.id ?? data.callId ?? data.call_id ?? null;
+    if (fonioCallId) {
+      await db.recoveryAttempt.update({ where: { id: opts.attemptId }, data: { fonioCallId } }).catch(() => {});
+    }
+    console.log(`✅ fonio API ${res.status} — ${data?.status}: ${data?.message}  → ${toNumber} is ringing (callId=${fonioCallId})\n`);
   } catch (err) {
     console.error("[fonio] outbound_call threw", err);
     return failAttempt(opts.attemptId);
@@ -164,6 +169,23 @@ async function failAttempt(attemptId: string): Promise<void> {
     await m.handleOutcome(attemptId, "failed");
   } catch (err) {
     console.error("[fonio] failAttempt could not advance the loop", err);
+  }
+}
+
+/** Best-effort: hang up an in-progress fonio call by ID. Non-fatal — logs and continues if it fails. */
+export async function cancelCall(fonioCallId: string): Promise<void> {
+  if (!LIVE || !API_KEY || !fonioCallId) return;
+  const path = CANCEL_PATH.replace("{id}", encodeURIComponent(fonioCallId));
+  const url = `${BASE}${path}`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(5_000),
+    });
+    console.log(`🔕 fonio cancel ${fonioCallId} → HTTP ${res.status}`);
+  } catch (err) {
+    console.warn("[fonio] cancelCall failed (non-fatal):", err);
   }
 }
 

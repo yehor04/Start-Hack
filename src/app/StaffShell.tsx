@@ -94,6 +94,11 @@ export default function StaffShell() {
             <Schedule slots={s?.schedule ?? []} onCancel={cancel} onView={() => setTab("recovery")} />
           ) : (
             <Recovery rec={s?.recovery ?? null} kpis={s?.kpis} onStop={async (id) => {
+              // Optimistic update: show "stopped" immediately without waiting for the next poll.
+              setS(prev => prev && prev.recovery ? {
+                ...prev,
+                recovery: { ...prev.recovery, slot: { ...prev.recovery.slot, status: "stopped" } }
+              } : prev);
               await fetch(`/api/slots/${id}/stop-recovery`, { method: "POST" }).catch(() => {});
               load();
             }} />

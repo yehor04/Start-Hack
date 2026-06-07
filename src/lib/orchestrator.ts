@@ -4,7 +4,7 @@
 
 import { db } from "./db";
 import { rankPool, type PatientLite, type Scored } from "./scoring";
-import { triggerCall } from "./fonio";
+import { triggerCall, cancelCall } from "./fonio";
 
 // Call outcomes (RESPONSE_HANDLING cases). "yes"=confirmed, "no"=declined this slot,
 // "maybe"=unsure (callback if all else fails), "optout"=never contact again,
@@ -277,6 +277,21 @@ export async function stopRecovery(slotId: string) {
     data: { type: "stopped", slotId, payload: JSON.stringify({ slotId, why: "stopped manually by staff" }) },
   });
   console.log(`🛑 RECOVERY STOPPED manually for slot ${slotId}`);
+
+  // Immediately resolve any in-progress call so the outcome webhook is ignored and the loop halts.
+  const active = await db.recoveryAttempt.findFirst({
+    where: { slotId, status: "calling", resolvedAt: null },
+  });
+  if (active) {
+    await db.recoveryAttempt.update({
+      where: { id: active.id },
+      data: { status: "failed", resolvedAt: new Date() },
+    });
+    // Best-effort: hang up the live fonio call immediately (non-fatal if it fails).
+    if (active.fonioCallId) {
+      cancelCall(active.fonioCallId).catch(() => {});
+    }
+  }
 }
 
 async function escalate(slotId: string, why: string) {
