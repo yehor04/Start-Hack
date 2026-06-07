@@ -322,7 +322,7 @@ async function callbackOrEscalate(slotId: string) {
  */
 export async function markExpiredSlots() {
   const expired = await db.slot.findMany({
-    where: { startsAt: { lt: new Date() }, status: { in: ["filling", "open", "escalated"] } },
+    where: { startsAt: { lt: new Date() }, status: "open" },
   });
   for (const s of expired) {
     await db.slot.update({ where: { id: s.id }, data: { status: "lost" } });
