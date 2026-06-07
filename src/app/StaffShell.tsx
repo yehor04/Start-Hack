@@ -142,6 +142,7 @@ function Schedule({ slots, onCancel, onView }: { slots: Slot[]; onCancel: (id: s
                   {sl.status === "filled" && <span className="st st-rec">✓ Recovered</span>}
                   {sl.status === "open" && <span className="st st-open">Open</span>}
                   {sl.status === "escalated" && <span className="st st-open">⚠ Needs human</span>}
+                  {sl.status === "stopped" && <span className="st st-open">Cancelled by staff</span>}
                   {sl.status === "lost" && <span className="st st-open">⏰ Lost</span>}
                 </td>
                 <td className="act">
@@ -215,6 +216,8 @@ function Recovery({ rec, kpis, onStop }: { rec: State["recovery"]; kpis?: State[
                 ? <div className="badge">✓ Recovered</div>
                 : slot.status === "escalated"
                 ? <div className="badge">⚠ Needs human</div>
+                : slot.status === "stopped"
+                ? <div className="badge">Cancelled by staff</div>
                 : slot.status === "lost"
                 ? <div className="badge">⏰ Slot lost</div>
                 : <div className="badge"><span className="pulse" /> {calling ? "Calling…" : "Filling…"}</div>}

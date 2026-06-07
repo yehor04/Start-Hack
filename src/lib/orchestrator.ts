@@ -125,7 +125,7 @@ export async function startRecovery(slotId: string) {
 
 export async function callNext(slotId: string) {
   const slot = await db.slot.findUnique({ where: { id: slotId } });
-  if (!slot) return;
+  if (!slot || slot.status === "stopped" || slot.status === "escalated" || slot.status === "filled") return;
   const ranked = await rankCandidates(slotId);
   const next = ranked.find((r) => r.scored.eligible && !r.attempted);
   // No fresh candidate left → give a "maybe" patient one callback before escalating (Case 5).
@@ -270,7 +270,7 @@ export async function handleOutcome(
 }
 
 export async function stopRecovery(slotId: string) {
-  await db.slot.update({ where: { id: slotId }, data: { status: "escalated" } });
+  await db.slot.update({ where: { id: slotId }, data: { status: "stopped" } });
   await db.eventLog.create({
     data: { type: "stopped", slotId, payload: JSON.stringify({ slotId, why: "stopped manually by staff" }) },
   });

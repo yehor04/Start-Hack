@@ -29,7 +29,7 @@ export async function getActiveRecovery() {
     include: { slot: true },
   });
   const slot =
-    (lastAttempt?.slot && ["filling", "filled", "open", "escalated", "lost"].includes(lastAttempt.slot.status)
+    (lastAttempt?.slot && ["filling", "filled", "open", "escalated", "lost", "stopped"].includes(lastAttempt.slot.status)
       ? lastAttempt.slot
       : null) ?? (await db.slot.findFirst({ where: { status: { in: ["filling", "escalated"] } } }));
   if (!slot) return null;
@@ -61,7 +61,7 @@ export async function getSlotAttempts() {
   const slots = await db.slot.findMany({
     where: {
       startsAt: { gte: start, lte: end },
-      status: { in: ["filling", "filled", "escalated", "lost"] },
+      status: { in: ["filling", "filled", "escalated", "lost", "stopped"] },
     },
     include: { attempts: true },
     orderBy: { startsAt: "asc" },
