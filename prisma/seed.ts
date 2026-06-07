@@ -15,13 +15,13 @@ type Raw = {
   days_on_waitlist: number; assigned_date: string; contact_attempts: number;
   last_contact_result: string; times_skipped: number; procedure_cost: number;
   procedure_time_min: number; phone: string;
-  consent: boolean; opted_out: boolean;
+  consent: boolean; opted_out?: boolean; // opted_out deprecated — `consent` is the single source
 };
 
 // Outbound consent (GDPR hard gate) comes straight from the dataset: a patient is callable only
-// if they consented AND have not opted out. (In the Dr. Berger demo cohort this excludes P017,
-// P023, P031, so the consent gate is visible in the recovery list.)
-const hasOutboundConsent = (p: Raw) => p.consent === true && p.opted_out !== true;
+// if `consent` is true. (`opted_out` was a duplicate of `consent` and is no longer used; the
+// "Don't ever call me" outcome sets consent=false at runtime.)
+const hasOutboundConsent = (p: Raw) => p.consent === true;
 
 const hrs = (h: number) => new Date(Date.now() + h * 3_600_000);
 const todayAt = (hh: number, mm = 0) => {

@@ -129,6 +129,7 @@ function Schedule({ slots, onCancel, onView }: { slots: Slot[]; onCancel: (id: s
                   {sl.status === "filled" && <span className="st st-rec">✓ Recovered</span>}
                   {sl.status === "open" && <span className="st st-open">Open</span>}
                   {sl.status === "escalated" && <span className="st st-open">⚠ Needs human</span>}
+                  {sl.status === "lost" && <span className="st st-open">⏰ Lost</span>}
                 </td>
                 <td className="act">
                   {sl.status === "booked" && <button className="cancel" onClick={() => onCancel(sl.id)}>Cancel</button>}
@@ -155,6 +156,10 @@ function statusPill(st: string) {
   if (st === "no_answer") return <span className="pill p-skip">No answer</span>;
   if (st === "voicemail") return <span className="pill p-skip">Voicemail</span>;
   if (st === "callback") return <span className="pill p-skip">Callback</span>;
+  if (st === "maybe") return <span className="pill p-queue">Maybe — callback</span>;
+  if (st === "optout") return <span className="pill p-inel">Opted out</span>;
+  if (st === "wrong_person") return <span className="pill p-skip">Wrong person</span>;
+  if (st === "failed") return <span className="pill p-skip">Call failed</span>;
   return <span className="pill p-queue">{st}</span>;
 }
 function urgencyChip(u: number) {
@@ -194,6 +199,8 @@ function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] 
                 ? <div className="badge">✓ Recovered</div>
                 : slot.status === "escalated"
                 ? <div className="badge">⚠ Needs human</div>
+                : slot.status === "lost"
+                ? <div className="badge">⏰ Slot lost</div>
                 : <div className="badge"><span className="pulse" /> {calling ? "Calling…" : "Filling…"}</div>}
             </div>
 
@@ -302,9 +309,14 @@ function Event({ type, payload, at }: { type: string; payload: string; at: strin
     cancellation: { dot: "g", text: <><b>Cancellation detected</b> — slot freed ({euro(p.value ?? 0)})</> },
     scored: { dot: "i", text: <><b>Ranked {p.candidates} candidates</b>{p.top ? ` — top: ${p.top}` : ""}</> },
     call_started: { dot: "i", text: <><b>Calling {p.patient}</b></> },
-    outcome: { dot: p.outcome === "yes" ? "g" : "a", text: <><b>{String(p.outcome).replace("_", " ")}</b> — {p.patient}</> },
+    outcome: { dot: p.outcome === "yes" ? "g" : "a", text: <><b>{String(p.outcome).replace(/_/g, " ")}</b> — {p.patient}</> },
     booked: { dot: "g", text: <><b>Booked ✓</b> — {p.patient} ({euro(p.value ?? 0)})</> },
     escalated: { dot: "m", text: <><b>Escalated</b> — {p.why}</> },
+    optout: { dot: "m", text: <><b>Opted out</b> — {p.patient} removed from waitlist</> },
+    maybe: { dot: "a", text: <><b>Maybe</b> — {p.patient} (callback if needed)</> },
+    callback: { dot: "i", text: <><b>Calling back</b> {p.patient}</> },
+    call_failed: { dot: "m", text: <><b>Call failed</b> — {p.patient} (manual review)</> },
+    lost: { dot: "m", text: <><b>Slot lost ⏰</b> — expired ({euro(p.revenueLost ?? 0)} lost)</> },
   };
   const m = map[type] ?? { dot: "m", text: <b>{type}</b> };
   return (

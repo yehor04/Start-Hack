@@ -6,7 +6,18 @@ import { db } from "./db";
 import { rankPool, type PatientLite, type Scored } from "./scoring";
 import { triggerCall } from "./fonio";
 
-export type Outcome = "yes" | "no" | "no_answer" | "voicemail" | "callback" | "failed";
+// Call outcomes (RESPONSE_HANDLING cases). "yes"=confirmed, "no"=declined this slot,
+// "maybe"=unsure (callback if all else fails), "optout"=never contact again,
+// "wrong_person"=someone else answered, "failed"=technical/connection failure.
+export type Outcome =
+  | "yes"
+  | "no"
+  | "maybe"
+  | "optout"
+  | "voicemail"
+  | "no_answer"
+  | "wrong_person"
+  | "failed";
 
 export type RankedCandidate = {
   patientId: string;
@@ -112,7 +123,8 @@ export async function callNext(slotId: string) {
   if (!slot) return;
   const ranked = await rankCandidates(slotId);
   const next = ranked.find((r) => r.scored.eligible && !r.attempted);
-  if (!next) return escalate(slotId, "waitlist exhausted");
+  // No fresh candidate left → give a "maybe" patient one callback before escalating (Case 5).
+  if (!next) return callbackOrEscalate(slotId);
 
   // Safety cap: never place more than N real calls for one slot (protects the credit budget if a
   // trigger keeps failing and the loop keeps advancing). Tunable via FONIO_MAX_CALLS_PER_SLOT.
@@ -173,21 +185,49 @@ export async function handleOutcome(attemptId: string, outcome: Outcome) {
   });
   await log("outcome", { slotId: attempt.slotId, patient: attempt.patient.name, outcome });
 
-  if (outcome === "yes") {
-    await db.slot.update({
-      where: { id: attempt.slotId },
-      data: { status: "filled", recoveredBy: attempt.patient.name },
-    });
-    await db.patient.update({ where: { id: attempt.patientId }, data: { onWaitlist: false } });
-    await log("booked", { slotId: attempt.slotId, patient: attempt.patient.name, value: attempt.slot.valueEur });
-    return;
+  const patientId = attempt.patientId;
+  const patch = (data: Record<string, unknown>) => db.patient.update({ where: { id: patientId }, data });
+
+  switch (outcome) {
+    case "yes": // Case 2 — Confirmed: book the slot and STOP the loop.
+      await db.slot.update({
+        where: { id: attempt.slotId },
+        data: { status: "filled", recoveredBy: attempt.patient.name },
+      });
+      await patch({ onWaitlist: false, contactAttempts: { increment: 1 }, lastContactResult: "confirmed" });
+      await log("booked", { slotId: attempt.slotId, patient: attempt.patient.name, value: attempt.slot.valueEur });
+      return; // do NOT call anyone else for this slot
+
+    case "optout": // Case 1 — Don't ever call me: drop consent + remove from waitlist permanently.
+      await patch({ consentOutbound: false, onWaitlist: false, contactAttempts: { increment: 1 }, lastContactResult: "declined" });
+      await log("optout", { slotId: attempt.slotId, patient: attempt.patient.name });
+      break; // the slot still needs filling → advance to the next candidate
+
+    case "no": // Case 3 — Rejection: stays on the waitlist, deprioritised for next time.
+      await patch({ contactAttempts: { increment: 1 }, timesSkipped: { increment: 1 }, lastContactResult: "declined" });
+      break;
+
+    case "maybe": // Case 5 — Unsure: NOT penalised; gets a callback if everyone else falls through.
+      await log("maybe", { slotId: attempt.slotId, patient: attempt.patient.name });
+      break; // patient record intentionally unchanged
+
+    case "voicemail": // Case 6
+      await patch({ contactAttempts: { increment: 1 }, lastContactResult: "voicemail" });
+      break;
+
+    case "no_answer": // Case 7
+      await patch({ contactAttempts: { increment: 1 }, lastContactResult: "no_answer" });
+      break;
+
+    case "wrong_person": // Case 9 — not the patient's fault: no skip, no result change.
+      await patch({ contactAttempts: { increment: 1 } });
+      break;
+
+    case "failed": // Case 8 — technical/connection failure: not a real attempt; flag for review.
+      await log("call_failed", { slotId: attempt.slotId, patient: attempt.patient.name, note: "technical failure — manual review" });
+      break;
   }
 
-  // record a soft signal so the next ranking reflects the failed contact
-  await db.patient.update({
-    where: { id: attempt.patientId },
-    data: { contactAttempts: { increment: 1 }, lastContactResult: outcome === "no" ? "declined" : outcome },
-  });
   await callNext(attempt.slotId);
 }
 
@@ -197,4 +237,64 @@ async function escalate(slotId: string, why: string) {
   await db.slot.update({ where: { id: slotId }, data: { status: "escalated" } });
   await log("escalated", { slotId, why });
   console.log(`🛑 ESCALATED slot ${slotId}: ${why} — needs a human.`);
+}
+
+/**
+ * Case 5 callback: when no fresh candidate remains, give the top "maybe" patient one more call
+ * before escalating. Guarded to ONE callback round per slot (an EventLog "callback" marker) so a
+ * repeated "maybe" can't loop forever.
+ */
+async function callbackOrEscalate(slotId: string) {
+  const slot = await db.slot.findUnique({ where: { id: slotId } });
+  if (!slot) return;
+
+  const calledBack = await db.eventLog.count({ where: { slotId, type: "callback" } });
+  if (calledBack === 0) {
+    const m = await db.recoveryAttempt.findFirst({
+      where: { slotId, status: "maybe" },
+      orderBy: { score: "desc" },
+      include: { patient: true },
+    });
+    if (m && m.patient.consentOutbound && m.patient.onWaitlist) {
+      await db.recoveryAttempt.update({ where: { id: m.id }, data: { status: "calling", resolvedAt: null } });
+      await log("callback", { slotId, patient: m.patient.name });
+      console.log(`📞 CALLBACK: ${m.patient.name} (no fresh candidates left → retrying a "maybe")`);
+      await triggerCall({
+        attemptId: m.id,
+        slotId,
+        patient: { name: m.patient.name, phone: m.patient.phone, condition: m.patient.condition },
+        slot: {
+          startsAt: slot.startsAt,
+          treatment: slot.treatment,
+          practitioner: slot.practitioner ?? "",
+          durationMin: slot.durationMin,
+        },
+        pAccept: m.pAccept ?? 0.5,
+      });
+      return;
+    }
+  }
+  return escalate(slotId, "waitlist exhausted");
+}
+
+/**
+ * Case 10 — Slot expires: slots whose start time has passed while still unfilled are marked "lost"
+ * and the lost revenue is logged. Call this periodically (it runs on each dashboard state poll).
+ */
+export async function markExpiredSlots() {
+  const expired = await db.slot.findMany({
+    where: { startsAt: { lt: new Date() }, status: { in: ["filling", "open", "escalated"] } },
+  });
+  for (const s of expired) {
+    await db.slot.update({ where: { id: s.id }, data: { status: "lost" } });
+    await db.eventLog.create({
+      data: {
+        type: "lost",
+        slotId: s.id,
+        payload: JSON.stringify({ slotId: s.id, revenueLost: s.valueEur, treatment: s.treatment }),
+      },
+    });
+    console.log(`⏰ SLOT LOST: ${s.treatment} expired unfilled — €${s.valueEur} lost.`);
+  }
+  return expired.length;
 }

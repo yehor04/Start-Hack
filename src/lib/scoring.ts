@@ -38,7 +38,15 @@ export type Ranked = { patient: PatientLite; scored: Scored };
 // Tunable weights (cost intentionally excluded from the score).
 const WEIGHTS = { urgency: 0.35, timeMatch: 0.2, days: 0.2, attempts: 0.1, result: 0.1, skipped: 0.05 };
 const URGENCY: Record<string, number> = { urgent: 1, moderate: 0.5, routine: 0 };
-const RESULT_PENALTY: Record<string, number> = { none: 0, voicemail: 0.2, no_answer: 0.5, declined: 1 };
+// Reachability penalty by last contact result. "confirmed"/"maybe" are not penalised.
+const RESULT_PENALTY: Record<string, number> = {
+  none: 0,
+  confirmed: 0,
+  maybe: 0,
+  voicemail: 0.2,
+  no_answer: 0.5,
+  declined: 1,
+};
 
 const clamp = (x: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, x));
 const halfDay = (t: Date) => (new Date(t).getHours() < 13 ? "morning" : "afternoon");

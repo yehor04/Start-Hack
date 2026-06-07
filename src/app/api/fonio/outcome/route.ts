@@ -47,15 +47,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "missing attemptId" }, { status: 400 });
   }
 
-  // Allow an explicit outcome override; otherwise derive it from accepted / callback_requested,
-  // accepting booleans, numbers, or strings ("yes"/"no"/"ja"/"nein"/"true"/"false"/…).
+  // Allow an explicit outcome override; otherwise derive it from the extracted variables + call
+  // status (RESPONSE_HANDLING cases). Values may be booleans, numbers, or strings.
   let outcome = (deepFind(body, ["outcome"]) ?? q.get("outcome")) as Outcome | undefined;
   if (!outcome) {
-    const accepted = norm(deepFind(body, ["accepted", "accept", "slot_accepted"]) ?? q.get("accepted"));
-    const callback = norm(deepFind(body, ["callback_requested", "callback"]) ?? q.get("callback_requested"));
-    if (YES.has(accepted)) outcome = "yes";
-    else if (YES.has(callback)) outcome = "callback";
-    else if (NO.has(accepted)) outcome = "no";
+    const accepted = norm(deepFind(body, ["accepted", "accept", "slot_accepted", "confirmed"]) ?? q.get("accepted"));
+    const maybe = norm(deepFind(body, ["maybe", "unsure", "undecided", "callback_requested", "callback"]) ?? q.get("maybe"));
+    const optout = norm(deepFind(body, ["opt_out", "optout", "do_not_contact", "do_not_call", "never_call"]) ?? q.get("opt_out"));
+    const wrong = norm(deepFind(body, ["wrong_person", "wrong_number", "not_the_patient"]) ?? q.get("wrong_person"));
+    const status = norm(deepFind(body, ["call_status", "callStatus", "outcome_status", "status"]));
+
+    if (YES.has(optout)) outcome = "optout"; // Case 1
+    else if (YES.has(wrong)) outcome = "wrong_person"; // Case 9
+    else if (YES.has(accepted)) outcome = "yes"; // Case 2
+    else if (YES.has(maybe)) outcome = "maybe"; // Case 5
+    else if (NO.has(accepted)) outcome = "no"; // Case 3
+    else if (/voicemail|voice_mail|mailbox/.test(status)) outcome = "voicemail"; // Case 6
+    else if (/no[-_ ]?answer|unanswered|noanswer/.test(status)) outcome = "no_answer"; // Case 7
+    else if (/fail|error|busy|abandon|cancel/.test(status)) outcome = "failed"; // Case 8
     else outcome = "no_answer";
   }
   console.log(`[fonio/outcome] attempt=${attemptId} -> ${outcome}`);
