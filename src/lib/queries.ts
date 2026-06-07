@@ -59,13 +59,17 @@ export async function getSlotAttempts() {
   const start = new Date(); start.setHours(0, 0, 0, 0);
   const end = new Date(); end.setHours(23, 59, 59, 999);
   const slots = await db.slot.findMany({
-    where: { startsAt: { gte: start, lte: end }, status: { in: ["filling", "filled", "escalated"] } },
-    include: { attempts: { where: { resolvedAt: { not: null } } } },
+    where: {
+      startsAt: { gte: start, lte: end },
+      status: { in: ["filling", "filled", "escalated", "lost"] },
+    },
+    include: { attempts: true },
     orderBy: { startsAt: "asc" },
   });
   return slots.map((s) => {
+    const resolved = s.attempts.filter((a) => a.resolvedAt !== null);
     const outcomes: Record<string, number> = {};
-    for (const a of s.attempts) outcomes[a.status] = (outcomes[a.status] ?? 0) + 1;
+    for (const a of resolved) outcomes[a.status] = (outcomes[a.status] ?? 0) + 1;
     return {
       id: s.id,
       startsAt: s.startsAt.toISOString(),
