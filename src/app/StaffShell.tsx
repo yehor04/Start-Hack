@@ -228,8 +228,6 @@ function Recovery({ rec, kpis }: { rec: State["recovery"]; kpis?: State["kpis"] 
                     <div className="reason">{c.reason}</div>
                   </div>
                   <div className="score">
-                    <div className="snum num">{c.eligible ? c.score.toFixed(2) : <>—<small> n/a</small></>}</div>
-                    <div className="bar"><i style={{ width: `${Math.round(c.score * 100)}%` }} /></div>
                     {statusPill(c.status)}
                   </div>
                 </div>
