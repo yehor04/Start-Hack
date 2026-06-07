@@ -86,6 +86,34 @@ export async function rankCandidates(slotId: string): Promise<RankedCandidate[]>
   });
 }
 
+// The ranking is computed ONCE at recovery start and stored as a "queue" event. Selection and the
+// dashboard read this fixed snapshot so the order and scores stay put as the loop runs — without it,
+// the pool-normalised scores are recomputed every call, so one unanswered call reshuffles everyone.
+// Live attempt status is merged in. Falls back to a live ranking if no snapshot exists.
+export async function getRankedStable(slotId: string): Promise<RankedCandidate[]> {
+  const snap = await db.eventLog.findFirst({
+    where: { slotId, type: "queue" },
+    orderBy: { createdAt: "desc" },
+  });
+  if (!snap) return rankCandidates(slotId);
+
+  let frozen: Array<Omit<RankedCandidate, "attempted" | "attemptStatus">>;
+  try {
+    frozen = JSON.parse(snap.payload).snapshot;
+  } catch {
+    return rankCandidates(slotId);
+  }
+  if (!Array.isArray(frozen) || !frozen.length) return rankCandidates(slotId);
+
+  const attempts = await db.recoveryAttempt.findMany({ where: { slotId } });
+  const byPatient = new Map(attempts.map((a) => [a.patientId, a] as const));
+  return frozen.map((f) => ({
+    ...f,
+    attempted: byPatient.has(f.patientId),
+    attemptStatus: byPatient.get(f.patientId)?.status ?? null,
+  }));
+}
+
 /** Unified trigger for ALL cancellation sources (patient page, reception, fonio inbound). */
 export async function cancelSlot(slotId: string, source = "reception") {
   const slot = await db.slot.findUnique({ where: { id: slotId } });
@@ -108,6 +136,18 @@ export async function startRecovery(slotId: string) {
   const ranked = await rankCandidates(slotId);
   const eligible = ranked.filter((r) => r.scored.eligible && !r.attempted);
   await log("scored", { slotId, candidates: eligible.length, top: eligible[0]?.name ?? null });
+  // Freeze this ranking for the whole recovery so the order doesn't reshuffle after each call.
+  await log("queue", {
+    slotId,
+    snapshot: ranked.map((r) => ({
+      patientId: r.patientId,
+      name: r.name,
+      phone: r.phone,
+      condition: r.condition,
+      procedureTimeMin: r.procedureTimeMin,
+      scored: r.scored,
+    })),
+  });
 
   const slot = await db.slot.findUnique({ where: { id: slotId } });
   console.log("\n────────────────────────────────────────────────────────");
@@ -128,7 +168,7 @@ export async function startRecovery(slotId: string) {
 export async function callNext(slotId: string) {
   const slot = await db.slot.findUnique({ where: { id: slotId } });
   if (!slot || slot.status === "stopped" || slot.status === "escalated" || slot.status === "filled") return;
-  const ranked = await rankCandidates(slotId);
+  const ranked = await getRankedStable(slotId);
   const next = ranked.find((r) => r.scored.eligible && !r.attempted);
   // No fresh candidate left → give a "maybe" patient one callback before escalating (Case 5).
   if (!next) return callbackOrEscalate(slotId);
